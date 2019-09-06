@@ -1,5 +1,5 @@
 {
-  "name": "call-lib",
+  "name": "callchain",
   "version": "0.2.9",
   "homepage": "https://github.com/callchain/bower-call",
   "description": "The Callchain JavaScript Library. Connect and interact to the Callchain network using the WebSocket protocol",
