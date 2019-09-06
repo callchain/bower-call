@@ -1,18 +1,18 @@
 {
   "name": "callchain",
-  "version": "0.2.9",
+  "version": "0.2.9.1",
   "homepage": "https://github.com/callchain/bower-call",
   "description": "The Callchain JavaScript Library. Connect and interact to the Callchain network using the WebSocket protocol",
   "main": "./call.js",
   "dependencies": {},
-  "_release": "0.2.9",
+  "_release": "0.2.9.1",
   "_resolution": {
     "type": "version",
-    "tag": "v0.2.9",
+    "tag": "v0.2.9.1",
     "commit": ""
   },
   "_source": "https://github.com/callchain/bower-call.git",
-  "_target": "~0.2.9",
+  "_target": "~0.2.9.1",
   "_originalSource": "call",
   "authors": [
     "landoyjx <landoyjx@163.com>"
