@@ -7,5 +7,37 @@
 
 </head>
 
-<body></body>
+<body>
+
+    <script>
+        console.dir(call);
+        var api = new call.CallAPI({server: 'wss://s1.callchain.live:5020'});
+
+        api.on('error', function(code, msg) {
+            console.dir(code);
+            console.dir(msg);
+        });
+
+        api.on('connected', function() {
+            console.log('connect it');
+        });
+
+        api.on('disconnected', function() {
+            console.log('server disconnect');
+        });
+
+        api.connect().then(async function() {
+            console.log('api connected');
+            console.dir(api);
+            var ret = await api.getServerInfo();
+            console.dir(ret);
+        }).catch(function(e) {
+            console.log('fail to connect api: ')
+            console.dir(e);
+        });
+        
+        
+    </script>
+
+</body>
 </html>
