@@ -3,7 +3,7 @@
 
 <head>
     <script src="./bower_components/lodash/lodash.js"></script>
-    <script src="./call-min.js"></script>
+    <script src="./call.js"></script>
 
 </head>
 
@@ -18,7 +18,7 @@
             console.dir(msg);
         });
 
-        api.on('connected', function() {
+        api.on('connected', async function() {
             console.log('connect it');
         });
 
@@ -35,8 +35,6 @@
             console.log('fail to connect api: ')
             console.dir(e);
         });
-        
-        
     </script>
 
 </body>
