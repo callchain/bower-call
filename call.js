@@ -8444,6 +8444,131 @@ exports.shr64_lo = shr64_lo;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var _ = __webpack_require__(0);
+var assert = __webpack_require__(3);
+var common = __webpack_require__(1);
+exports.common = common;
+function clamp(value, min, max) {
+    assert(min <= max, 'Illegal clamp bounds');
+    return Math.min(Math.max(value, min), max);
+}
+exports.clamp = clamp;
+function getCALLBalance(connection, address, ledgerVersion) {
+    var request = {
+        command: 'account_info',
+        account: address,
+        ledger_index: ledgerVersion
+    };
+    return connection.request(request).then(function (data) {
+        return common.dropsToCall(data.account_data.Balance);
+    });
+}
+exports.getCALLBalance = getCALLBalance;
+// If the marker is omitted from a response, you have reached the end
+function getRecursiveRecur(getter, marker, limit) {
+    var jobs = getter(marker, limit).then(function (data) {
+        var remaining = limit - data.results.length;
+        if (remaining > 0 && data.marker !== undefined) {
+            return getRecursiveRecur(getter, data.marker, remaining).then(function (result) {
+                data.results = data.results.concat(result["results"]);
+                if (result['marker'])
+                    data.marker = result['marker'];
+                else
+                    delete data.marker;
+                return data;
+            });
+        }
+        var obj = { results: data.results };
+        if (data.marker) {
+            obj['marker'] = data.marker;
+        }
+        if (data['nickName'])
+            obj['nickName'] = data['nickName'];
+        if (data['call_info'])
+            obj['call_info'] = data['call_info'];
+        return obj;
+    });
+    return jobs;
+}
+// function getRecursive(getter: Getter, limit?: number): Promise<Array<any>> {
+//   return getRecursiveRecur(getter, undefined, limit || Infinity)
+// }
+function getRecursive(getter, limit, marker) {
+    return getRecursiveRecur(getter, marker, limit || Infinity);
+}
+exports.getRecursive = getRecursive;
+function renameCounterpartyToIssuer(obj) {
+    var issuer = (obj.counterparty !== undefined) ?
+        obj.counterparty :
+        ((obj.issuer !== undefined) ? obj.issuer : undefined);
+    var withIssuer = Object.assign({}, obj, { issuer: issuer });
+    delete withIssuer.counterparty;
+    return withIssuer;
+}
+exports.renameCounterpartyToIssuer = renameCounterpartyToIssuer;
+function renameCounterpartyToIssuerInOrder(order) {
+    var taker_gets = renameCounterpartyToIssuer(order.taker_gets);
+    var taker_pays = renameCounterpartyToIssuer(order.taker_pays);
+    var changes = { taker_gets: taker_gets, taker_pays: taker_pays };
+    return _.assign({}, order, _.omitBy(changes, _.isUndefined));
+}
+exports.renameCounterpartyToIssuerInOrder = renameCounterpartyToIssuerInOrder;
+function signum(num) {
+    return (num === 0) ? 0 : (num > 0 ? 1 : -1);
+}
+function compareTransactions(first, second) {
+    if (!first.outcome || !second.outcome) {
+        return 0;
+    }
+    if (first.outcome.ledgerVersion === second.outcome.ledgerVersion) {
+        return signum(first.outcome.indexInLedger - second.outcome.indexInLedger);
+    }
+    return first.outcome.ledgerVersion < second.outcome.ledgerVersion ? -1 : 1;
+}
+exports.compareTransactions = compareTransactions;
+function hasCompleteLedgerRange(connection, minLedgerVersion, maxLedgerVersion) {
+    var firstLedgerVersion = 32570; // earlier versions have been lost
+    return connection.hasLedgerVersions(minLedgerVersion || firstLedgerVersion, maxLedgerVersion);
+}
+exports.hasCompleteLedgerRange = hasCompleteLedgerRange;
+function isPendingLedgerVersion(connection, maxLedgerVersion) {
+    return connection.getLedgerVersion().then(function (ledgerVersion) {
+        return ledgerVersion < (maxLedgerVersion || 0);
+    });
+}
+exports.isPendingLedgerVersion = isPendingLedgerVersion;
+function ensureLedgerVersion(options) {
+    if (Boolean(options) && options.ledgerVersion !== undefined &&
+        options.ledgerVersion !== null) {
+        return Promise.resolve(options);
+    }
+    return this.getLedgerVersion().then(function (ledgerVersion) {
+        return _.assign({}, options, { ledgerVersion: ledgerVersion });
+    });
+}
+exports.ensureLedgerVersion = ensureLedgerVersion;
+function hexToStringWide(h) {
+    var a = [];
+    var i = 0;
+    if (h.length % 4) {
+        a.push(String.fromCharCode(parseInt(h.substring(0, 4), 16)));
+        i = 4;
+    }
+    for (; i < h.length; i += 4) {
+        a.push(String.fromCharCode(parseInt(h.substring(i, i + 4), 16)));
+    }
+    return a.join('');
+}
+exports.hexToStringWide = hexToStringWide;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8920,118 +9045,6 @@ function once(emitter, name) {
     emitter.once(name, eventListener);
   });
 }
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var _ = __webpack_require__(0);
-var assert = __webpack_require__(3);
-var common = __webpack_require__(1);
-exports.common = common;
-function clamp(value, min, max) {
-    assert(min <= max, 'Illegal clamp bounds');
-    return Math.min(Math.max(value, min), max);
-}
-exports.clamp = clamp;
-function getCALLBalance(connection, address, ledgerVersion) {
-    var request = {
-        command: 'account_info',
-        account: address,
-        ledger_index: ledgerVersion
-    };
-    return connection.request(request).then(function (data) {
-        return common.dropsToCall(data.account_data.Balance);
-    });
-}
-exports.getCALLBalance = getCALLBalance;
-// If the marker is omitted from a response, you have reached the end
-function getRecursiveRecur(getter, marker, limit) {
-    var jobs = getter(marker, limit).then(function (data) {
-        var remaining = limit - data.results.length;
-        if (remaining > 0 && data.marker !== undefined) {
-            return getRecursiveRecur(getter, data.marker, remaining).then(function (result) {
-                data.results = data.results.concat(result["results"]);
-                if (result['marker'])
-                    data.marker = result['marker'];
-                else
-                    delete data.marker;
-                return data;
-            });
-        }
-        var obj = { results: data.results };
-        if (data.marker) {
-            obj['marker'] = data.marker;
-        }
-        if (data['nickName'])
-            obj['nickName'] = data['nickName'];
-        if (data['call_info'])
-            obj['call_info'] = data['call_info'];
-        return obj;
-    });
-    return jobs;
-}
-// function getRecursive(getter: Getter, limit?: number): Promise<Array<any>> {
-//   return getRecursiveRecur(getter, undefined, limit || Infinity)
-// }
-function getRecursive(getter, limit, marker) {
-    return getRecursiveRecur(getter, marker, limit || Infinity);
-}
-exports.getRecursive = getRecursive;
-function renameCounterpartyToIssuer(obj) {
-    var issuer = (obj.counterparty !== undefined) ?
-        obj.counterparty :
-        ((obj.issuer !== undefined) ? obj.issuer : undefined);
-    var withIssuer = Object.assign({}, obj, { issuer: issuer });
-    delete withIssuer.counterparty;
-    return withIssuer;
-}
-exports.renameCounterpartyToIssuer = renameCounterpartyToIssuer;
-function renameCounterpartyToIssuerInOrder(order) {
-    var taker_gets = renameCounterpartyToIssuer(order.taker_gets);
-    var taker_pays = renameCounterpartyToIssuer(order.taker_pays);
-    var changes = { taker_gets: taker_gets, taker_pays: taker_pays };
-    return _.assign({}, order, _.omitBy(changes, _.isUndefined));
-}
-exports.renameCounterpartyToIssuerInOrder = renameCounterpartyToIssuerInOrder;
-function signum(num) {
-    return (num === 0) ? 0 : (num > 0 ? 1 : -1);
-}
-function compareTransactions(first, second) {
-    if (!first.outcome || !second.outcome) {
-        return 0;
-    }
-    if (first.outcome.ledgerVersion === second.outcome.ledgerVersion) {
-        return signum(first.outcome.indexInLedger - second.outcome.indexInLedger);
-    }
-    return first.outcome.ledgerVersion < second.outcome.ledgerVersion ? -1 : 1;
-}
-exports.compareTransactions = compareTransactions;
-function hasCompleteLedgerRange(connection, minLedgerVersion, maxLedgerVersion) {
-    var firstLedgerVersion = 32570; // earlier versions have been lost
-    return connection.hasLedgerVersions(minLedgerVersion || firstLedgerVersion, maxLedgerVersion);
-}
-exports.hasCompleteLedgerRange = hasCompleteLedgerRange;
-function isPendingLedgerVersion(connection, maxLedgerVersion) {
-    return connection.getLedgerVersion().then(function (ledgerVersion) {
-        return ledgerVersion < (maxLedgerVersion || 0);
-    });
-}
-exports.isPendingLedgerVersion = isPendingLedgerVersion;
-function ensureLedgerVersion(options) {
-    if (Boolean(options) && options.ledgerVersion !== undefined &&
-        options.ledgerVersion !== null) {
-        return Promise.resolve(options);
-    }
-    return this.getLedgerVersion().then(function (ledgerVersion) {
-        return _.assign({}, options, { ledgerVersion: ledgerVersion });
-    });
-}
-exports.ensureLedgerVersion = ensureLedgerVersion;
 
 
 /***/ }),
@@ -18567,7 +18580,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var events_1 = __webpack_require__(14);
+var events_1 = __webpack_require__(15);
 var common_1 = __webpack_require__(1);
 var server = __webpack_require__(241);
 var connect = server.connect;
@@ -18588,22 +18601,22 @@ var settings_1 = __webpack_require__(308);
 var account_info_1 = __webpack_require__(309);
 var account_by_name_1 = __webpack_require__(310);
 var account_issues_1 = __webpack_require__(311);
-var account_invoices_1 = __webpack_require__(312);
-var payment_1 = __webpack_require__(313);
-var trustline_1 = __webpack_require__(314);
-var order_1 = __webpack_require__(315);
-var ordercancellation_1 = __webpack_require__(316);
-var settings_2 = __webpack_require__(317);
-var issue_set_1 = __webpack_require__(318);
-var sign_1 = __webpack_require__(319);
-var combine_1 = __webpack_require__(320);
-var submit_1 = __webpack_require__(321);
-var generate_address_1 = __webpack_require__(322);
-var address_fromSecret_1 = __webpack_require__(323);
-var ledgerhash_1 = __webpack_require__(324);
-var ledger_1 = __webpack_require__(325);
+var account_invoices_1 = __webpack_require__(313);
+var payment_1 = __webpack_require__(314);
+var trustline_1 = __webpack_require__(315);
+var order_1 = __webpack_require__(316);
+var ordercancellation_1 = __webpack_require__(317);
+var settings_2 = __webpack_require__(318);
+var issue_set_1 = __webpack_require__(319);
+var sign_1 = __webpack_require__(320);
+var combine_1 = __webpack_require__(321);
+var submit_1 = __webpack_require__(322);
+var generate_address_1 = __webpack_require__(323);
+var address_fromSecret_1 = __webpack_require__(324);
+var ledgerhash_1 = __webpack_require__(325);
+var ledger_1 = __webpack_require__(326);
 var rangeset_1 = __webpack_require__(70);
-var ledgerUtils = __webpack_require__(15);
+var ledgerUtils = __webpack_require__(14);
 var schemaValidator = __webpack_require__(63);
 // prevent access to non-validated ledger versions
 var RestrictedConnection = /** @class */ (function (_super) {
@@ -19635,7 +19648,7 @@ exports.default = RangeSet;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var transaction_1 = __webpack_require__(50);
 var common_1 = __webpack_require__(1);
 function attachTransactionDate(connection, tx) {
@@ -25263,7 +25276,7 @@ var Duplex;
 Readable.ReadableState = ReadableState;
 /*<replacement>*/
 
-var EE = __webpack_require__(14).EventEmitter;
+var EE = __webpack_require__(15).EventEmitter;
 
 var EElistenerCount = function EElistenerCount(emitter, type) {
   return emitter.listeners(type).length;
@@ -26362,7 +26375,7 @@ function indexOf(xs, x) {
 /* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(14).EventEmitter;
+module.exports = __webpack_require__(15).EventEmitter;
 
 
 /***/ }),
@@ -27948,7 +27961,7 @@ var Duplex;
 Readable.ReadableState = ReadableState;
 
 /*<replacement>*/
-var EE = __webpack_require__(14).EventEmitter;
+var EE = __webpack_require__(15).EventEmitter;
 
 var EElistenerCount = function (emitter, type) {
   return emitter.listeners(type).length;
@@ -28932,7 +28945,7 @@ function indexOf(xs, x) {
 /* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(14).EventEmitter;
+module.exports = __webpack_require__(15).EventEmitter;
 
 
 /***/ }),
@@ -29754,7 +29767,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var api_1 = __webpack_require__(61);
 exports.CallAPI = api_1.CallAPI;
 // Broadcast api is experimental
-var broadcast_1 = __webpack_require__(327);
+var broadcast_1 = __webpack_require__(328);
 exports.CallAPIBroadcast = broadcast_1.CallAPIBroadcast;
 
 
@@ -37460,7 +37473,7 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var events_1 = __webpack_require__(14);
+var events_1 = __webpack_require__(15);
 var url_1 = __webpack_require__(29);
 var WebSocket = __webpack_require__(233);
 var rangeset_1 = __webpack_require__(70);
@@ -38170,7 +38183,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var events_1 = __webpack_require__(14);
+var events_1 = __webpack_require__(15);
 /**
  * Provides `EventEmitter` interface for native browser `WebSocket`,
  * same, as `ws` package provides.
@@ -38875,7 +38888,7 @@ function plural(ms, msAbs, n, name) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const events_1 = __webpack_require__(14);
+const events_1 = __webpack_require__(15);
 const debug_1 = __importDefault(__webpack_require__(49));
 const promisify_1 = __importDefault(__webpack_require__(239));
 const debug = debug_1.default('agent-base');
@@ -39524,7 +39537,8 @@ function parseIssueSet(tx) {
         issuer: tx.Total.issuer,
         total: tx.Total.value,
         additional: parseFlag(tx.Flags, flags.Additional),
-        invoice: parseFlag(tx.Flags, flags.NonFungible)
+        invoice: parseFlag(tx.Flags, flags.NonFungible),
+        transferRate: tx.TransferRate || undefined
     });
 }
 exports.default = parseIssueSet;
@@ -39688,7 +39702,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var binary = __webpack_require__(40);
 var computeTransactionHash = __webpack_require__(44).computeTransactionHash;
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var transaction_1 = __webpack_require__(50);
 var transaction_2 = __webpack_require__(71);
 var common_1 = __webpack_require__(1);
@@ -41888,7 +41902,7 @@ module.exports = CipherBase
 
 module.exports = Stream;
 
-var EE = __webpack_require__(14).EventEmitter;
+var EE = __webpack_require__(15).EventEmitter;
 var inherits = __webpack_require__(2);
 
 inherits(Stream, EE);
@@ -42648,21 +42662,9 @@ module.exports = {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var common_1 = __webpack_require__(1);
 var account_trustline_1 = __webpack_require__(299);
-// function hexToStringWide(h) {//16进制转中英文
-//     let a = [];
-//     let i = 0;
-//     if (h.length % 4) {
-//         a.push(String.fromCharCode(parseInt(h.substring(0, 4), 16)));
-//         i = 4;
-//     }
-//     for (; i<h.length; i+=4) {
-//         a.push(String.fromCharCode(parseInt(h.substring(i, i+4), 16)));
-//     }
-//     return a.join('');
-// }
 function currencyFilter(currency, trustline) {
     return currency === null || trustline.specification.currency === currency;
 }
@@ -42712,18 +42714,6 @@ exports.default = getTrustlines;
 Object.defineProperty(exports, "__esModule", { value: true });
 var utils_1 = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
-// function hexToStringWide(h) {//16进制转中英文
-//     let a = [];
-//     let i = 0;
-//     if (h.length % 4) {
-//         a.push(String.fromCharCode(parseInt(h.substring(0, 4), 16)));
-//         i = 4;
-//     }
-//     for (; i<h.length; i+=4) {
-//         a.push(String.fromCharCode(parseInt(h.substring(i, i+4), 16)));
-//     }
-//     return a.join('');
-// }
 function parseAccountTrustline(trustline) {
     var specification = common_1.removeUndefined({
         limit: trustline.limit,
@@ -42762,7 +42752,7 @@ exports.default = parseAccountTrustline;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var common_1 = __webpack_require__(1);
 function getTrustlineBalanceAmount(trustline) {
     return {
@@ -42817,7 +42807,7 @@ exports.default = getBalances;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var common_1 = __webpack_require__(1);
 function formatBalanceSheet(balanceSheet) {
     var result = {};
@@ -42869,7 +42859,7 @@ exports.default = getBalanceSheet;
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var bignumber_js_1 = __webpack_require__(6);
-var utils_1 = __webpack_require__(15);
+var utils_1 = __webpack_require__(14);
 var common_1 = __webpack_require__(1);
 var pathfind_1 = __webpack_require__(303);
 var NotFoundError = common_1.errors.NotFoundError;
@@ -43037,7 +43027,7 @@ exports.default = parsePathfind;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var common_1 = __webpack_require__(1);
 var account_order_1 = __webpack_require__(305);
 function requestAccountOffers(connection, address, ledgerVersion, marker, limit) {
@@ -43117,7 +43107,7 @@ exports.default = parseAccountOrder;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(14);
 var orderbook_order_1 = __webpack_require__(307);
 var common_1 = __webpack_require__(1);
 // account is to specify a "perspective", which affects which unfunded offers
@@ -43352,29 +43342,39 @@ exports.default = getAccountByName;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function hexToStringWide(h) {
-    var a = [];
-    var i = 0;
-    if (h.length % 4) {
-        a.push(String.fromCharCode(parseInt(h.substring(0, 4), 16)));
-        i = 4;
-    }
-    for (; i < h.length; i += 4) {
-        a.push(String.fromCharCode(parseInt(h.substring(i, i + 4), 16)));
-    }
-    return a.join('');
+var utils = __webpack_require__(14);
+var _ = __webpack_require__(0);
+var account_issue_1 = __webpack_require__(312);
+function formatResponse(options, data) {
+    var response = { results: data.lines.map(account_issue_1.default) };
+    // if(data.marker){
+    //     response.marker = data.marker;
+    // }
+    // if(data.NickName){
+    //     response.nickName = utils.hexToStringWide(data.NickName);
+    // }
+    // if(data.call_info){
+    //     response.call_info = data.call_info;
+    // }
+    return response;
 }
-function getAccountIssues(address) {
+function getAccountIssuesInternal(connection, address, ledgerVersion, options, marker, limit) {
     var request = {
         command: 'account_issues',
         account: address,
+        ledger_index: ledgerVersion,
+        marker: marker,
+        limit: utils.clamp(limit, 10, 400),
     };
-    return this.connection.request(request).then(function (response) {
-        if (response.NickName) {
-            response.nickName = hexToStringWide(hexToStringWide(response.NickName));
-            delete response.NickName;
-        }
-        return response;
+    return connection.request(request).then(_.partial(formatResponse, options));
+}
+function getAccountIssues(address, options) {
+    // TODO validate
+    var _this = this;
+    if (options === void 0) { options = {}; }
+    return this.getLedgerVersion().then(function (ledgerVersion) {
+        var getter = _.partial(getAccountIssuesInternal, _this.connection, address, options.ledgerVersion || ledgerVersion, options);
+        return utils.getRecursive(getter, options.limit, options.marker);
     });
 }
 exports.default = getAccountIssues;
@@ -43382,6 +43382,38 @@ exports.default = getAccountIssues;
 
 /***/ }),
 /* 312 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var common_1 = __webpack_require__(1);
+var flags = common_1.txFlags.IssueSet;
+function parseFlag(flagsValue, value) {
+    return ((flagsValue & value) !== 0);
+}
+function parseAccountIssue(issue) {
+    var specification = common_1.removeUndefined({
+        currency: issue.Total.currency,
+        issuer: issue.Total.issuer,
+        value: issue.Total.value,
+        additional: parseFlag(issue.Flags, flags.Additional),
+        invoice: parseFlag(issue.Flags, flags.NonFungible),
+        transferRate: issue.TransferRate
+    });
+    var state = {
+        fans: issue.Fans,
+        issued: issue.Issued.value,
+        freeze: issue.Freeze.value
+    };
+    var result = { specification: specification, state: state };
+    return result;
+}
+exports.default = parseAccountIssue;
+
+
+/***/ }),
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43400,7 +43432,7 @@ exports.default = getAccountInvoices;
 
 
 /***/ }),
-/* 313 */
+/* 314 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43507,7 +43539,7 @@ exports.default = preparePayment;
 
 
 /***/ }),
-/* 314 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43565,7 +43597,7 @@ exports.default = prepareTrustline;
 
 
 /***/ }),
-/* 315 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43620,7 +43652,7 @@ exports.default = prepareOrder;
 
 
 /***/ }),
-/* 316 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43650,7 +43682,7 @@ exports.default = prepareOrderCancellation;
 
 
 /***/ }),
-/* 317 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43779,7 +43811,7 @@ exports.default = prepareSettings;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 318 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43891,7 +43923,7 @@ exports.default = prepareIssueSet;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 319 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43939,7 +43971,7 @@ exports.default = sign;
 
 
 /***/ }),
-/* 320 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43983,7 +44015,7 @@ exports.default = combine;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 321 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44031,7 +44063,7 @@ exports.default = submit;
 
 
 /***/ }),
-/* 322 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44059,7 +44091,7 @@ exports.generateAddressAPI = generateAddressAPI;
 
 
 /***/ }),
-/* 323 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44081,7 +44113,7 @@ exports.fromSecret = fromSecret;
 
 
 /***/ }),
-/* 324 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44154,14 +44186,14 @@ exports.default = computeLedgerHash;
 
 
 /***/ }),
-/* 325 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var common_1 = __webpack_require__(1);
-var ledger_1 = __webpack_require__(326);
+var ledger_1 = __webpack_require__(327);
 function getLedger(options) {
     if (options === void 0) { options = {}; }
     common_1.validate.getLedger({ options: options });
@@ -44181,7 +44213,7 @@ exports.default = getLedger;
 
 
 /***/ }),
-/* 326 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44241,7 +44273,7 @@ exports.default = parseLedger;
 
 
 /***/ }),
-/* 327 */
+/* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
