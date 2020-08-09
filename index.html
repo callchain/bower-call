@@ -28,9 +28,8 @@
 
         api.connect().then(async function() {
             console.log('api connected');
-            console.dir(api);
-            var ret = await api.getServerInfo();
-            console.dir(ret);
+            var result = await api.getTransactions('chkw6nVJ1g1APQ1vA5EX9ek5Vb4ZGrckwP' ,{limit: 10, marker: {ledger: 25128440, seq: 0}});
+            console.dir(result);
         }).catch(function(e) {
             console.log('fail to connect api: ')
             console.dir(e);
@@ -39,3 +38,6 @@
 
 </body>
 </html>
+
+
+

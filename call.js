@@ -83,7 +83,7 @@ var errors = __webpack_require__(36);
 exports.errors = errors;
 var validate = __webpack_require__(103);
 exports.validate = validate;
-var serverInfo = __webpack_require__(247);
+var serverInfo = __webpack_require__(229);
 exports.serverInfo = serverInfo;
 var utils_1 = __webpack_require__(48);
 exports.dropsToCall = utils_1.dropsToCall;
@@ -93,7 +93,7 @@ exports.removeUndefined = utils_1.removeUndefined;
 exports.convertKeysFromSnakeCaseToCamelCase = utils_1.convertKeysFromSnakeCaseToCamelCase;
 exports.iso8601ToCallTime = utils_1.iso8601ToCallTime;
 exports.callTimeToISO8601 = utils_1.callTimeToISO8601;
-var connection_1 = __webpack_require__(248);
+var connection_1 = __webpack_require__(230);
 exports.Connection = connection_1.default;
 var txflags_1 = __webpack_require__(62);
 exports.txFlags = txflags_1.txFlags;
@@ -101,6 +101,39 @@ exports.txFlags = txflags_1.txFlags;
 
 /***/ }),
 /* 2 */
+/***/ (function(module, exports) {
+
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    if (superCtor) {
+      ctor.super_ = superCtor
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      })
+    }
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    if (superCtor) {
+      ctor.super_ = superCtor
+      var TempCtor = function () {}
+      TempCtor.prototype = superCtor.prototype
+      ctor.prototype = new TempCtor()
+      ctor.prototype.constructor = ctor
+    }
+  }
+}
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -611,40 +644,7 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    if (superCtor) {
-      ctor.super_ = superCtor
-      ctor.prototype = Object.create(superCtor.prototype, {
-        constructor: {
-          value: ctor,
-          enumerable: false,
-          writable: true,
-          configurable: true
-        }
-      })
-    }
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    if (superCtor) {
-      ctor.super_ = superCtor
-      var TempCtor = function () {}
-      TempCtor.prototype = superCtor.prototype
-      ctor.prototype = new TempCtor()
-      ctor.prototype.constructor = ctor
-    }
-  }
-}
-
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
 /* 4 */
@@ -652,7 +652,7 @@ if (typeof Object.create === 'function') {
 
 "use strict";
 var _ = __webpack_require__(0);
-var inherits = __webpack_require__(3);
+var inherits = __webpack_require__(2);
 
 function forEach(obj, func) {
   Object.keys(obj || {}).forEach(function (k) {
@@ -750,8 +750,8 @@ module.exports = function makeClass(klass_, definition_) {
 
 
 
-var base64 = __webpack_require__(249)
-var ieee754 = __webpack_require__(250)
+var base64 = __webpack_require__(231)
+var ieee754 = __webpack_require__(232)
 var isArray = __webpack_require__(69)
 
 exports.Buffer = Buffer
@@ -2530,7 +2530,7 @@ function isnan (val) {
   return val !== val // eslint-disable-line no-self-compare
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
 /* 6 */
@@ -5278,7 +5278,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! bignumber.js v4.1.0 https://github.com/Mik
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 
 function signum(a, b) {
   return a < b ? -1 : a === b ? 0 : 1;
@@ -5414,276 +5414,6 @@ elliptic.eddsa = __webpack_require__(136);
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
-Object.defineProperty(exports, "__esModule", { value: true });
-var _ = __webpack_require__(0);
-var transactionParser = __webpack_require__(260);
-var bignumber_js_1 = __webpack_require__(6);
-var common = __webpack_require__(1);
-var amount_1 = __webpack_require__(16);
-function adjustQualityForCALL(quality, takerGetsCurrency, takerPaysCurrency) {
-    // quality = takerPays.value/takerGets.value
-    // using drops (1e-6 CALL) for CALL values
-    var numeratorShift = (takerPaysCurrency === 'CALL' ? -6 : 0);
-    var denominatorShift = (takerGetsCurrency === 'CALL' ? -6 : 0);
-    var shift = numeratorShift - denominatorShift;
-    return shift === 0 ? quality :
-        (new bignumber_js_1.default(quality)).shift(shift).toString();
-}
-exports.adjustQualityForCALL = adjustQualityForCALL;
-function parseQuality(quality) {
-    if (typeof quality !== 'number') {
-        return undefined;
-    }
-    return (new bignumber_js_1.default(quality)).shift(-9).toNumber();
-}
-exports.parseQuality = parseQuality;
-function parseTimestamp(callTime) {
-    if (typeof callTime !== 'number') {
-        return undefined;
-    }
-    return common.callTimeToISO8601(callTime);
-}
-exports.parseTimestamp = parseTimestamp;
-function removeEmptyCounterparty(amount) {
-    if (amount.counterparty === '') {
-        delete amount.counterparty;
-    }
-}
-function removeEmptyCounterpartyInBalanceChanges(balanceChanges) {
-    _.forEach(balanceChanges, function (changes) {
-        _.forEach(changes, removeEmptyCounterparty);
-    });
-}
-function removeEmptyCounterpartyInOrderbookChanges(orderbookChanges) {
-    _.forEach(orderbookChanges, function (changes) {
-        _.forEach(changes, function (change) {
-            _.forEach(change, removeEmptyCounterparty);
-        });
-    });
-}
-function isPartialPayment(tx) {
-    return (tx.Flags & common.txFlags.Payment.PartialPayment) !== 0;
-}
-exports.isPartialPayment = isPartialPayment;
-function parseDeliveredAmount(tx) {
-    if (tx.TransactionType !== 'Payment' ||
-        tx.meta.TransactionResult !== 'tesSUCCESS') {
-        return undefined;
-    }
-    if (tx.meta.delivered_amount &&
-        tx.meta.delivered_amount === 'unavailable') {
-        return undefined;
-    }
-    // parsable delivered_amount
-    if (tx.meta.delivered_amount) {
-        return amount_1.default(tx.meta.delivered_amount);
-    }
-    // DeliveredAmount only present on partial payments
-    if (tx.meta.DeliveredAmount) {
-        return amount_1.default(tx.meta.DeliveredAmount);
-    }
-    // no partial payment flag, use tx.Amount
-    if (tx.Amount && !isPartialPayment(tx)) {
-        return amount_1.default(tx.Amount);
-    }
-    // DeliveredAmount field was introduced at
-    // ledger 4594095 - after that point its absence
-    // on a tx flagged as partial payment indicates
-    // the full amount was transferred. The amount
-    // transferred with a partial payment before
-    // that date must be derived from metadata.
-    if (tx.Amount && tx.ledger_index > 4594094) {
-        return amount_1.default(tx.Amount);
-    }
-    return undefined;
-}
-function parseOutcome(tx) {
-    var metadata = tx.meta || tx.metaData;
-    if (!metadata) {
-        return undefined;
-    }
-    var balanceChanges = transactionParser.parseBalanceChanges(metadata);
-    var orderbookChanges = transactionParser.parseOrderbookChanges(metadata);
-    removeEmptyCounterpartyInBalanceChanges(balanceChanges);
-    removeEmptyCounterpartyInOrderbookChanges(orderbookChanges);
-    return common.removeUndefined({
-        result: tx.meta.TransactionResult,
-        timestamp: parseTimestamp(tx.date),
-        fee: common.dropsToCall(tx.Fee),
-        balanceChanges: balanceChanges,
-        orderbookChanges: orderbookChanges,
-        ledgerVersion: tx.ledger_index,
-        indexInLedger: tx.meta.TransactionIndex,
-        deliveredAmount: parseDeliveredAmount(tx)
-    });
-}
-exports.parseOutcome = parseOutcome;
-function hexToString(hex) {
-    return hex ? new Buffer(hex, 'hex').toString('utf-8') : undefined;
-}
-exports.hexToString = hexToString;
-function parseMemos(tx) {
-    if (!Array.isArray(tx.Memos) || tx.Memos.length === 0) {
-        return undefined;
-    }
-    return tx.Memos.map(function (m) {
-        return common.removeUndefined({
-            type: m.Memo.parsed_memo_type || hexToString(m.Memo.MemoType),
-            format: m.Memo.parsed_memo_format || hexToString(m.Memo.MemoFormat),
-            data: m.Memo.parsed_memo_data || hexToString(m.Memo.MemoData)
-        });
-    });
-}
-exports.parseMemos = parseMemos;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(Buffer) {
-Object.defineProperty(exports, "__esModule", { value: true });
-var bignumber_js_1 = __webpack_require__(6);
-var common = __webpack_require__(1);
-exports.common = common;
-function formatPrepareResponse(txJSON) {
-    // const instructions = {
-    //   fee: common.dropsToCall(txJSON.Fee),
-    //   sequence: txJSON.Sequence,
-    //   maxLedgerVersion: txJSON.LastLedgerSequence === undefined ?
-    //     null : txJSON.LastLedgerSequence
-    // }
-    var instructions = {
-        fee: common.dropsToCall(txJSON.Fee),
-        sequence: txJSON.Sequence
-    };
-    return {
-        txJSON: JSON.stringify(txJSON),
-        instructions: instructions
-    };
-}
-// function setCanonicalFlag(txJSON) {
-//   txJSON.Flags |= txFlags.Universal.FullyCanonicalSig
-//   // JavaScript converts operands to 32-bit signed ints before doing bitwise
-//   // operations. We need to convert it back to an unsigned int.
-//   txJSON.Flags = txJSON.Flags >>> 0
-// }
-function scaleValue(value, multiplier, extra) {
-    if (extra === void 0) { extra = 0; }
-    return (new bignumber_js_1.default(value)).times(multiplier).plus(extra).toString();
-}
-function prepareTransaction(txJSON, api, instructions) {
-    common.validate.instructions(instructions);
-    var account = txJSON.Account;
-    // setCanonicalFlag(txJSON)
-    // function prepareMaxLedgerVersion(): Promise<Object> {
-    //   if (instructions.maxLedgerVersion !== undefined) {
-    //     if (instructions.maxLedgerVersion !== null) {
-    //       txJSON.LastLedgerSequence = instructions.maxLedgerVersion
-    //     }
-    //     return Promise.resolve(txJSON)
-    //   }
-    //   const offset = instructions.maxLedgerVersionOffset !== undefined ?
-    //     instructions.maxLedgerVersionOffset : 3
-    //   return api.connection.getLedgerVersion().then(ledgerVersion => {
-    //     txJSON.LastLedgerSequence = ledgerVersion + offset
-    //     return txJSON
-    //   })
-    // }
-    function prepareFee() {
-        var multiplier = instructions.signersCount === undefined ? 1 :
-            instructions.signersCount + 1;
-        if (instructions.fee !== undefined) {
-            txJSON.Fee = scaleValue(common.callToDrops(instructions.fee), multiplier);
-            return Promise.resolve(txJSON);
-        }
-        var cushion = api._feeCushion;
-        return common.serverInfo.getFee(api.connection, cushion).then(function (fee) {
-            return api.connection.getFeeRef().then(function (feeRef) {
-                var extraFee = (txJSON.TransactionType !== 'EscrowFinish' ||
-                    txJSON.Fulfillment === undefined) ? 0 :
-                    (cushion * feeRef * (32 + Math.floor(new Buffer(txJSON.Fulfillment, 'hex').length / 16)));
-                var feeDrops = common.callToDrops(fee);
-                if (instructions.maxFee !== undefined) {
-                    var maxFeeDrops = common.callToDrops(instructions.maxFee);
-                    var normalFee = scaleValue(feeDrops, multiplier, extraFee);
-                    txJSON.Fee = bignumber_js_1.default.min(normalFee, maxFeeDrops).toString();
-                }
-                else {
-                    txJSON.Fee = scaleValue(feeDrops, multiplier, extraFee);
-                }
-                return txJSON;
-            });
-        });
-    }
-    function prepareSequence() {
-        if (instructions.sequence !== undefined) {
-            txJSON.Sequence = instructions.sequence;
-            return Promise.resolve(txJSON);
-        }
-        var request = {
-            command: 'account_info',
-            account: account
-        };
-        return api.connection.request(request).then(function (response) {
-            txJSON.Sequence = response.account_data.Sequence;
-            return txJSON;
-        });
-    }
-    function stringToHexWide(s) {
-        var result = '';
-        for (var i = 0; i < s.length; i++) {
-            var b = s.charCodeAt(i);
-            if (0 <= b && b < 16) {
-                result += '000' + b.toString(16);
-            }
-            if (16 <= b && b < 255) {
-                result += '00' + b.toString(16);
-            }
-            if (255 <= b && b < 4095) {
-                result += '0' + b.toString(16);
-            }
-            if (4095 <= b && b < 65535) {
-                result += b.toString(16);
-            }
-        }
-        return result;
-    }
-    if (txJSON.NickName) {
-        txJSON.NickName = stringToHexWide(stringToHexWide(txJSON.NickName));
-    }
-    return Promise.all([
-        //prepareMaxLedgerVersion(),
-        prepareFee(),
-        prepareSequence()
-    ]).then(function () { return formatPrepareResponse(txJSON); });
-}
-exports.prepareTransaction = prepareTransaction;
-function convertStringToHex(string) {
-    return new Buffer(string, 'utf8').toString('hex').toUpperCase();
-}
-exports.convertStringToHex = convertStringToHex;
-function convertMemo(memo) {
-    return {
-        Memo: common.removeUndefined({
-            MemoData: memo.data ? convertStringToHex(memo.data) : undefined,
-            MemoType: memo.type ? convertStringToHex(memo.type) : undefined,
-            MemoFormat: memo.format ? convertStringToHex(memo.format) : undefined
-        })
-    };
-}
-exports.convertMemo = convertMemo;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
-
-/***/ }),
-/* 11 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -5873,7 +5603,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 12 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {(function (module, exports) {
@@ -8327,7 +8057,7 @@ Mont.prototype.invm = function invm(a) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(46)(module)))
 
 /***/ }),
-/* 13 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
@@ -8398,7 +8128,7 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 /***/ }),
-/* 14 */
+/* 12 */
 /***/ (function(module, exports) {
 
 var g;
@@ -8425,14 +8155,14 @@ module.exports = g;
 
 
 /***/ }),
-/* 15 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var assert = __webpack_require__(31);
-var inherits = __webpack_require__(3);
+var inherits = __webpack_require__(2);
 
 exports.inherits = inherits;
 
@@ -8710,31 +8440,7 @@ exports.shr64_lo = shr64_lo;
 
 
 /***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var common = __webpack_require__(1);
-function parseAmount(amount) {
-    if (typeof amount === 'string') {
-        return {
-            currency: 'CALL',
-            value: common.dropsToCall(amount)
-        };
-    }
-    return {
-        currency: amount.currency,
-        value: amount.value,
-        counterparty: amount.issuer
-    };
-}
-exports.default = parseAmount;
-
-
-/***/ }),
-/* 17 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9217,14 +8923,14 @@ function once(emitter, name) {
 
 
 /***/ }),
-/* 18 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var common = __webpack_require__(1);
 exports.common = common;
 function clamp(value, min, max) {
@@ -9329,7 +9035,146 @@ exports.ensureLedgerVersion = ensureLedgerVersion;
 
 
 /***/ }),
-/* 19 */
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(Buffer) {
+Object.defineProperty(exports, "__esModule", { value: true });
+var bignumber_js_1 = __webpack_require__(6);
+var common = __webpack_require__(1);
+exports.common = common;
+function formatPrepareResponse(txJSON) {
+    // const instructions = {
+    //   fee: common.dropsToCall(txJSON.Fee),
+    //   sequence: txJSON.Sequence,
+    //   maxLedgerVersion: txJSON.LastLedgerSequence === undefined ?
+    //     null : txJSON.LastLedgerSequence
+    // }
+    var instructions = {
+        fee: common.dropsToCall(txJSON.Fee),
+        sequence: txJSON.Sequence
+    };
+    return {
+        txJSON: JSON.stringify(txJSON),
+        instructions: instructions
+    };
+}
+// function setCanonicalFlag(txJSON) {
+//   txJSON.Flags |= txFlags.Universal.FullyCanonicalSig
+//   // JavaScript converts operands to 32-bit signed ints before doing bitwise
+//   // operations. We need to convert it back to an unsigned int.
+//   txJSON.Flags = txJSON.Flags >>> 0
+// }
+function scaleValue(value, multiplier, extra) {
+    if (extra === void 0) { extra = 0; }
+    return (new bignumber_js_1.default(value)).times(multiplier).plus(extra).toString();
+}
+function prepareTransaction(txJSON, api, instructions) {
+    common.validate.instructions(instructions);
+    var account = txJSON.Account;
+    // setCanonicalFlag(txJSON)
+    // function prepareMaxLedgerVersion(): Promise<Object> {
+    //   if (instructions.maxLedgerVersion !== undefined) {
+    //     if (instructions.maxLedgerVersion !== null) {
+    //       txJSON.LastLedgerSequence = instructions.maxLedgerVersion
+    //     }
+    //     return Promise.resolve(txJSON)
+    //   }
+    //   const offset = instructions.maxLedgerVersionOffset !== undefined ?
+    //     instructions.maxLedgerVersionOffset : 3
+    //   return api.connection.getLedgerVersion().then(ledgerVersion => {
+    //     txJSON.LastLedgerSequence = ledgerVersion + offset
+    //     return txJSON
+    //   })
+    // }
+    function prepareFee() {
+        var multiplier = instructions.signersCount === undefined ? 1 :
+            instructions.signersCount + 1;
+        if (instructions.fee !== undefined) {
+            txJSON.Fee = scaleValue(common.callToDrops(instructions.fee), multiplier);
+            return Promise.resolve(txJSON);
+        }
+        var cushion = api._feeCushion;
+        return common.serverInfo.getFee(api.connection, cushion).then(function (fee) {
+            return api.connection.getFeeRef().then(function (feeRef) {
+                var extraFee = txJSON.Fulfillment === undefined ? 0 :
+                    (cushion * feeRef * (32 + Math.floor(new Buffer(txJSON.Fulfillment, 'hex').length / 16)));
+                var feeDrops = common.callToDrops(fee);
+                if (instructions.maxFee !== undefined) {
+                    var maxFeeDrops = common.callToDrops(instructions.maxFee);
+                    var normalFee = scaleValue(feeDrops, multiplier, extraFee);
+                    txJSON.Fee = bignumber_js_1.default.min(normalFee, maxFeeDrops).toString();
+                }
+                else {
+                    txJSON.Fee = scaleValue(feeDrops, multiplier, extraFee);
+                }
+                return txJSON;
+            });
+        });
+    }
+    function prepareSequence() {
+        if (instructions.sequence !== undefined) {
+            txJSON.Sequence = instructions.sequence;
+            return Promise.resolve(txJSON);
+        }
+        var request = {
+            command: 'account_info',
+            account: account
+        };
+        return api.connection.request(request).then(function (response) {
+            txJSON.Sequence = response.account_data.Sequence;
+            return txJSON;
+        });
+    }
+    function stringToHexWide(s) {
+        var result = '';
+        for (var i = 0; i < s.length; i++) {
+            var b = s.charCodeAt(i);
+            if (0 <= b && b < 16) {
+                result += '000' + b.toString(16);
+            }
+            if (16 <= b && b < 255) {
+                result += '00' + b.toString(16);
+            }
+            if (255 <= b && b < 4095) {
+                result += '0' + b.toString(16);
+            }
+            if (4095 <= b && b < 65535) {
+                result += b.toString(16);
+            }
+        }
+        return result;
+    }
+    if (txJSON.NickName) {
+        txJSON.NickName = stringToHexWide(stringToHexWide(txJSON.NickName));
+    }
+    return Promise.all([
+        //prepareMaxLedgerVersion(),
+        prepareFee(),
+        prepareSequence()
+    ]).then(function () { return formatPrepareResponse(txJSON); });
+}
+exports.prepareTransaction = prepareTransaction;
+function convertStringToHex(string) {
+    return new Buffer(string, 'utf8').toString('hex').toUpperCase();
+}
+exports.convertStringToHex = convertStringToHex;
+function convertMemo(memo) {
+    return {
+        Memo: common.removeUndefined({
+            MemoData: memo.data ? convertStringToHex(memo.data) : undefined,
+            MemoType: memo.type ? convertStringToHex(memo.type) : undefined,
+            MemoFormat: memo.format ? convertStringToHex(memo.format) : undefined
+        })
+    };
+}
+exports.convertMemo = convertMemo;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9398,12 +9243,12 @@ module.exports = {
   Comparable: Comparable };
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var hash = exports;
 
-hash.utils = __webpack_require__(15);
+hash.utils = __webpack_require__(13);
 hash.common = __webpack_require__(32);
 hash.sha = __webpack_require__(113);
 hash.ripemd = __webpack_require__(117);
@@ -9419,27 +9264,157 @@ hash.ripemd160 = hash.ripemd.ripemd160;
 
 
 /***/ }),
-/* 21 */
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(Buffer) {
+Object.defineProperty(exports, "__esModule", { value: true });
+var _ = __webpack_require__(0);
+var transactionParser = __webpack_require__(242);
+var bignumber_js_1 = __webpack_require__(6);
+var common = __webpack_require__(1);
+var amount_1 = __webpack_require__(23);
+function adjustQualityForCALL(quality, takerGetsCurrency, takerPaysCurrency) {
+    // quality = takerPays.value/takerGets.value
+    // using drops (1e-6 CALL) for CALL values
+    var numeratorShift = (takerPaysCurrency === 'CALL' ? -6 : 0);
+    var denominatorShift = (takerGetsCurrency === 'CALL' ? -6 : 0);
+    var shift = numeratorShift - denominatorShift;
+    return shift === 0 ? quality :
+        (new bignumber_js_1.default(quality)).shift(shift).toString();
+}
+exports.adjustQualityForCALL = adjustQualityForCALL;
+function parseQuality(quality) {
+    if (typeof quality !== 'number') {
+        return undefined;
+    }
+    return (new bignumber_js_1.default(quality)).shift(-9).toNumber();
+}
+exports.parseQuality = parseQuality;
+function parseTimestamp(callTime) {
+    if (typeof callTime !== 'number') {
+        return undefined;
+    }
+    return common.callTimeToISO8601(callTime);
+}
+exports.parseTimestamp = parseTimestamp;
+function removeEmptyCounterparty(amount) {
+    if (amount.counterparty === '') {
+        delete amount.counterparty;
+    }
+}
+function removeEmptyCounterpartyInBalanceChanges(balanceChanges) {
+    _.forEach(balanceChanges, function (changes) {
+        _.forEach(changes, removeEmptyCounterparty);
+    });
+}
+function removeEmptyCounterpartyInOrderbookChanges(orderbookChanges) {
+    _.forEach(orderbookChanges, function (changes) {
+        _.forEach(changes, function (change) {
+            _.forEach(change, removeEmptyCounterparty);
+        });
+    });
+}
+function isPartialPayment(tx) {
+    return (tx.Flags & common.txFlags.Payment.PartialPayment) !== 0;
+}
+exports.isPartialPayment = isPartialPayment;
+function parseDeliveredAmount(tx) {
+    if (tx.TransactionType !== 'Payment' ||
+        tx.meta.TransactionResult !== 'tesSUCCESS') {
+        return undefined;
+    }
+    if (tx.meta.delivered_amount &&
+        tx.meta.delivered_amount === 'unavailable') {
+        return undefined;
+    }
+    // parsable delivered_amount
+    if (tx.meta.delivered_amount) {
+        return amount_1.default(tx.meta.delivered_amount);
+    }
+    // DeliveredAmount only present on partial payments
+    if (tx.meta.DeliveredAmount) {
+        return amount_1.default(tx.meta.DeliveredAmount);
+    }
+    // no partial payment flag, use tx.Amount
+    if (tx.Amount && !isPartialPayment(tx)) {
+        return amount_1.default(tx.Amount);
+    }
+    // DeliveredAmount field was introduced at
+    // ledger 0 - after that point its absence
+    // on a tx flagged as partial payment indicates
+    // the full amount was transferred. The amount
+    // transferred with a partial payment before
+    // that date must be derived from metadata.
+    if (tx.Amount && tx.ledger_index > 0) {
+        return amount_1.default(tx.Amount);
+    }
+    return undefined;
+}
+function parseOutcome(tx) {
+    var metadata = tx.meta || tx.metaData;
+    if (!metadata) {
+        return undefined;
+    }
+    var balanceChanges = transactionParser.parseBalanceChanges(metadata);
+    var orderbookChanges = transactionParser.parseOrderbookChanges(metadata);
+    removeEmptyCounterpartyInBalanceChanges(balanceChanges);
+    removeEmptyCounterpartyInOrderbookChanges(orderbookChanges);
+    return common.removeUndefined({
+        result: tx.meta.TransactionResult,
+        timestamp: parseTimestamp(tx.date),
+        fee: common.dropsToCall(tx.Fee),
+        balanceChanges: balanceChanges,
+        orderbookChanges: orderbookChanges,
+        ledgerVersion: tx.ledger_index,
+        indexInLedger: tx.meta.TransactionIndex,
+        deliveredAmount: parseDeliveredAmount(tx)
+    });
+}
+exports.parseOutcome = parseOutcome;
+function hexToString(hex) {
+    return hex ? new Buffer(hex, 'hex').toString('utf-8') : undefined;
+}
+exports.hexToString = hexToString;
+function parseMemos(tx) {
+    if (!Array.isArray(tx.Memos) || tx.Memos.length === 0) {
+        return undefined;
+    }
+    return tx.Memos.map(function (m) {
+        return common.removeUndefined({
+            type: m.Memo.parsed_memo_type || hexToString(m.Memo.MemoType),
+            format: m.Memo.parsed_memo_format || hexToString(m.Memo.MemoFormat),
+            data: m.Memo.parsed_memo_data || hexToString(m.Memo.MemoData)
+        });
+    });
+}
+exports.parseMemos = parseMemos;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var enums = __webpack_require__(24);var
 Field = enums.Field;var _require =
 __webpack_require__(51),AccountID = _require.AccountID;var _require2 =
-__webpack_require__(280),Amount = _require2.Amount;var _require3 =
-__webpack_require__(282),Blob = _require3.Blob;var _require4 =
+__webpack_require__(256),Amount = _require2.Amount;var _require3 =
+__webpack_require__(258),Blob = _require3.Blob;var _require4 =
 __webpack_require__(55),Currency = _require4.Currency;var _require5 =
-__webpack_require__(283),Hash128 = _require5.Hash128;var _require6 =
+__webpack_require__(259),Hash128 = _require5.Hash128;var _require6 =
 __webpack_require__(52),Hash160 = _require6.Hash160;var _require7 =
 __webpack_require__(76),Hash256 = _require7.Hash256;var _require8 =
-__webpack_require__(284),PathSet = _require8.PathSet;var _require9 =
-__webpack_require__(285),STArray = _require9.STArray;var _require10 =
+__webpack_require__(260),PathSet = _require8.PathSet;var _require9 =
+__webpack_require__(261),STArray = _require9.STArray;var _require10 =
 __webpack_require__(77),STObject = _require10.STObject;var _require11 =
-__webpack_require__(286),UInt16 = _require11.UInt16;var _require12 =
-__webpack_require__(287),UInt32 = _require12.UInt32;var _require13 =
+__webpack_require__(262),UInt16 = _require11.UInt16;var _require12 =
+__webpack_require__(263),UInt32 = _require12.UInt32;var _require13 =
 __webpack_require__(75),UInt64 = _require13.UInt64;var _require14 =
-__webpack_require__(288),UInt8 = _require14.UInt8;var _require15 =
-__webpack_require__(289),Vector256 = _require15.Vector256;
+__webpack_require__(264),UInt8 = _require14.UInt8;var _require15 =
+__webpack_require__(265),Vector256 = _require15.Vector256;
 
 var coreTypes = {
   AccountID: AccountID,
@@ -9470,7 +9445,7 @@ Field.LedgerEntryType.associatedType = enums.LedgerEntryType;
 module.exports = coreTypes;
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9520,7 +9495,7 @@ module.exports = Duplex;
 
 /*<replacement>*/
 var util = Object.create(__webpack_require__(35));
-util.inherits = __webpack_require__(3);
+util.inherits = __webpack_require__(2);
 /*</replacement>*/
 
 var Readable = __webpack_require__(89);
@@ -9607,7 +9582,7 @@ Duplex.prototype._destroy = function (err, cb) {
 };
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9939,15 +9914,39 @@ exports.getDecimalPlaces = function getDecimalPlaces(number) {
 
 
 /***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var common = __webpack_require__(1);
+function parseAmount(amount) {
+    if (typeof amount === 'string') {
+        return {
+            currency: 'CALL',
+            value: common.dropsToCall(amount)
+        };
+    }
+    return {
+        currency: amount.currency,
+        value: amount.value,
+        counterparty: amount.issuer
+    };
+}
+exports.default = parseAmount;
+
+
+/***/ }),
 /* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var _slicedToArray = function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i["return"]) _i["return"]();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var assert = __webpack_require__(2);
+var _slicedToArray = function () {function sliceIterator(arr, i) {var _arr = [];var _n = true;var _d = false;var _e = undefined;try {for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {_arr.push(_s.value);if (i && _arr.length === i) break;}} catch (err) {_d = true;_e = err;} finally {try {if (!_n && _i["return"]) _i["return"]();} finally {if (_d) throw _e;}}return _arr;}return function (arr, i) {if (Array.isArray(arr)) {return arr;} else if (Symbol.iterator in Object(arr)) {return sliceIterator(arr, i);} else {throw new TypeError("Invalid attempt to destructure non-iterable instance");}};}();var assert = __webpack_require__(3);
 var _ = __webpack_require__(0);var _require =
 __webpack_require__(7),parseBytes = _require.parseBytes,serializeUIntN = _require.serializeUIntN;
 var makeClass = __webpack_require__(4);
-var enums = __webpack_require__(279);
+var enums = __webpack_require__(255);
 
 function transformWith(func, obj) {
   return _.transform(obj, func);
@@ -10125,7 +10124,7 @@ module.exports = Enums;
 
   var Buffer;
   try {
-    Buffer = __webpack_require__(281).Buffer;
+    Buffer = __webpack_require__(257).Buffer;
   } catch (e) {
   }
 
@@ -13693,7 +13692,7 @@ var Readable = __webpack_require__(80);
 
 var Writable = __webpack_require__(84);
 
-__webpack_require__(3)(Duplex, Readable);
+__webpack_require__(2)(Duplex, Readable);
 
 {
   // Allow the keys array to be GC'ed.
@@ -13787,13 +13786,13 @@ Object.defineProperty(Duplex.prototype, 'destroyed', {
     this._writableState.destroyed = value;
   }
 });
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
 /* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 // prototype class for hash functions
 function Hash (blockSize, finalSize) {
@@ -14622,7 +14621,7 @@ Url.prototype.parseHost = function() {
 "use strict";
 
 
-var hashjs = __webpack_require__(20);
+var hashjs = __webpack_require__(18);
 var apiFactory = __webpack_require__(119);
 
 var NODE_PUBLIC = 28;
@@ -14679,7 +14678,7 @@ assert.equal = function assertEqual(l, r, msg) {
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var assert = __webpack_require__(31);
 
 function BlockHash() {
@@ -14837,7 +14836,7 @@ module.exports = {
 
 /*<replacement>*/
 
-var Buffer = __webpack_require__(13).Buffer;
+var Buffer = __webpack_require__(11).Buffer;
 /*</replacement>*/
 
 var isEncoding = Buffer.isEncoding || function (encoding) {
@@ -15387,9 +15386,9 @@ exports.PendingLedgerVersionError = PendingLedgerVersionError;
 "use strict";
  // eslint-disable-line strict
 
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var brorand = __webpack_require__(67);
-var hashjs = __webpack_require__(20);
+var hashjs = __webpack_require__(18);
 var elliptic = __webpack_require__(8);
 var Ed25519 = elliptic.eddsa('ed25519');
 var Secp256k1 = elliptic.ec('secp256k1');
@@ -15611,8 +15610,8 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {return typeof obj;} : function (obj) {return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;};var assert = __webpack_require__(2);
-var coreTypes = __webpack_require__(278);var
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {return typeof obj;} : function (obj) {return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;};var assert = __webpack_require__(3);
+var coreTypes = __webpack_require__(254);var
 quality =
 
 
@@ -15689,10 +15688,10 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var BN = __webpack_require__(25);
 var makeClass = __webpack_require__(4);var _require =
-__webpack_require__(19),Comparable = _require.Comparable,SerializedType = _require.SerializedType;var _require2 =
+__webpack_require__(17),Comparable = _require.Comparable,SerializedType = _require.SerializedType;var _require2 =
 __webpack_require__(7),serializeUIntN = _require2.serializeUIntN;
 var MAX_VALUES = [0, 255, 65535, 16777215, 4294967295];
 
@@ -15757,7 +15756,7 @@ module.exports = {
 "use strict";
 /* WEBPACK VAR INJECTION */(function(Buffer) {var makeClass = __webpack_require__(4);var _require =
 __webpack_require__(33),HashPrefix = _require.HashPrefix;var _require2 =
-__webpack_require__(21),Hash256 = _require2.Hash256;var _require3 =
+__webpack_require__(20),Hash256 = _require2.Hash256;var _require3 =
 __webpack_require__(7),parseBytes = _require3.parseBytes;
 var createHash = __webpack_require__(78);
 
@@ -15850,7 +15849,7 @@ function nextTick(fn, arg1, arg2, arg3) {
 }
 
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
 /* 44 */
@@ -15864,7 +15863,7 @@ var binary = __webpack_require__(40);
 var hashprefixes = __webpack_require__(94);
 var SHAMap = __webpack_require__(95).SHAMap;
 var SHAMapTreeNode = __webpack_require__(95).SHAMapTreeNode;
-var ledgerspaces = __webpack_require__(321);
+var ledgerspaces = __webpack_require__(297);
 var sha512half = __webpack_require__(96);
 
 function hash(hex) {
@@ -16744,7 +16743,7 @@ function callbackify(original) {
 }
 exports.callbackify = callbackify;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
 /* 46 */
@@ -16780,7 +16779,7 @@ module.exports = function(module) {
 
 
 var urilib = __webpack_require__(29);
-var helpers = __webpack_require__(23);
+var helpers = __webpack_require__(22);
 
 module.exports.SchemaScanResult = SchemaScanResult;
 function SchemaScanResult(found, ref){
@@ -17189,7 +17188,7 @@ function localstorage() {
 	}
 }
 
-module.exports = __webpack_require__(254)(exports);
+module.exports = __webpack_require__(236)(exports);
 
 const {formatters} = module.exports;
 
@@ -17205,7 +17204,7 @@ formatters.j = function (v) {
 	}
 };
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
 /* 50 */
@@ -17214,23 +17213,17 @@ formatters.j = function (v) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
+var assert = __webpack_require__(3);
+var utils_1 = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
-var payment_1 = __webpack_require__(263);
-var trustline_1 = __webpack_require__(264);
-var issue_set_1 = __webpack_require__(265);
-var order_1 = __webpack_require__(266);
-var cancellation_1 = __webpack_require__(267);
-var settings_1 = __webpack_require__(268);
-var escrow_creation_1 = __webpack_require__(269);
-var escrow_execution_1 = __webpack_require__(270);
-var escrow_cancellation_1 = __webpack_require__(271);
-var payment_channel_create_1 = __webpack_require__(272);
-var payment_channel_fund_1 = __webpack_require__(273);
-var payment_channel_claim_1 = __webpack_require__(274);
-var fee_update_1 = __webpack_require__(275);
-var amendment_1 = __webpack_require__(276);
+var payment_1 = __webpack_require__(245);
+var trustline_1 = __webpack_require__(246);
+var issueset_1 = __webpack_require__(247);
+var order_1 = __webpack_require__(248);
+var cancellation_1 = __webpack_require__(249);
+var settings_1 = __webpack_require__(250);
+var fee_update_1 = __webpack_require__(251);
+var amendment_1 = __webpack_require__(252);
 function parseTransactionType(type) {
     var mapping = {
         Payment: 'payment',
@@ -17239,12 +17232,6 @@ function parseTransactionType(type) {
         OfferCancel: 'orderCancellation',
         AccountSet: 'settings',
         SetRegularKey: 'settings',
-        EscrowCreate: 'escrowCreation',
-        EscrowFinish: 'escrowExecution',
-        EscrowCancel: 'escrowCancellation',
-        PaymentChannelCreate: 'paymentChannelCreate',
-        PaymentChannelFund: 'paymentChannelFund',
-        PaymentChannelClaim: 'paymentChannelClaim',
         SignerListSet: 'settings',
         SetFee: 'feeUpdate',
         EnableAmendment: 'amendment',
@@ -17260,15 +17247,9 @@ function parseTransaction(tx) {
         'order': order_1.default,
         'orderCancellation': cancellation_1.default,
         'settings': settings_1.default,
-        'escrowCreation': escrow_creation_1.default,
-        'escrowExecution': escrow_execution_1.default,
-        'escrowCancellation': escrow_cancellation_1.default,
-        'paymentChannelCreate': payment_channel_create_1.default,
-        'paymentChannelFund': payment_channel_fund_1.default,
-        'paymentChannelClaim': payment_channel_claim_1.default,
         'feeUpdate': fee_update_1.default,
         'amendment': amendment_1.default,
-        'issueSet': issue_set_1.default,
+        'issueSet': issueset_1.default,
     };
     var parser = mapping[type];
     assert(parser !== undefined, 'Unrecognized transaction type');
@@ -17354,9 +17335,9 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var makeClass = __webpack_require__(4);var _require =
-__webpack_require__(19),Comparable = _require.Comparable,SerializedType = _require.SerializedType;var _require2 =
+__webpack_require__(17),Comparable = _require.Comparable,SerializedType = _require.SerializedType;var _require2 =
 __webpack_require__(7),compareBytes = _require2.compareBytes,parseBytes = _require2.parseBytes;
 
 var Hash = makeClass({
@@ -17405,7 +17386,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var assert = __webpack_require__(2);var _require =
+var assert = __webpack_require__(3);var _require =
 __webpack_require__(7),parseBytes = _require.parseBytes,bytesToHex = _require.bytesToHex;
 var makeClass = __webpack_require__(4);var _require2 =
 __webpack_require__(24),Type = _require2.Type,Field = _require2.Field;
@@ -17617,9 +17598,9 @@ module.exports = {
  /* eslint-disable func-style */
 
 var BN = __webpack_require__(25);
-var types = __webpack_require__(21);var _require =
+var types = __webpack_require__(20);var _require =
 __webpack_require__(33),HashPrefix = _require.HashPrefix;var _require2 =
-__webpack_require__(290),BinaryParser = _require2.BinaryParser;var _require3 =
+__webpack_require__(266),BinaryParser = _require2.BinaryParser;var _require3 =
 __webpack_require__(54),BinarySerializer = _require3.BinarySerializer,BytesList = _require3.BytesList;var _require4 =
 __webpack_require__(7),bytesToHex = _require4.bytesToHex,slice = _require4.slice,parseBytes = _require4.parseBytes;var _require5 =
 
@@ -17801,9 +17782,9 @@ exports = module.exports = __webpack_require__(89);
 exports.Stream = exports;
 exports.Readable = exports;
 exports.Writable = __webpack_require__(60);
-exports.Duplex = __webpack_require__(22);
+exports.Duplex = __webpack_require__(21);
 exports.Transform = __webpack_require__(92);
-exports.PassThrough = __webpack_require__(313);
+exports.PassThrough = __webpack_require__(289);
 
 
 /***/ }),
@@ -17946,7 +17927,7 @@ Writable.WritableState = WritableState;
 
 /*<replacement>*/
 var util = Object.create(__webpack_require__(35));
-util.inherits = __webpack_require__(3);
+util.inherits = __webpack_require__(2);
 /*</replacement>*/
 
 /*<replacement>*/
@@ -17979,7 +17960,7 @@ util.inherits(Writable, Stream);
 function nop() {}
 
 function WritableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(22);
+  Duplex = Duplex || __webpack_require__(21);
 
   options = options || {};
 
@@ -18129,7 +18110,7 @@ if (typeof Symbol === 'function' && Symbol.hasInstance && typeof Function.protot
 }
 
 function Writable(options) {
-  Duplex = Duplex || __webpack_require__(22);
+  Duplex = Duplex || __webpack_require__(21);
 
   // Writable ctor is applied to Duplexes, too.
   // `realHasInstance` is necessary because using plain `instanceof`
@@ -18566,7 +18547,7 @@ Writable.prototype._destroy = function (err, cb) {
   this.end();
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11), __webpack_require__(311).setImmediate, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9), __webpack_require__(287).setImmediate, __webpack_require__(12)))
 
 /***/ }),
 /* 61 */
@@ -18586,9 +18567,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var events_1 = __webpack_require__(17);
+var events_1 = __webpack_require__(14);
 var common_1 = __webpack_require__(1);
-var server = __webpack_require__(259);
+var server = __webpack_require__(241);
 var connect = server.connect;
 var disconnect = server.disconnect;
 var getServerInfo = server.getServerInfo;
@@ -18596,37 +18577,33 @@ var getFee = server.getFee;
 var isConnected = server.isConnected;
 var getLedgerVersion = server.getLedgerVersion;
 var transaction_1 = __webpack_require__(71);
-var transactions_1 = __webpack_require__(277);
-var trustlines_1 = __webpack_require__(322);
-var balances_1 = __webpack_require__(324);
-var balance_sheet_1 = __webpack_require__(325);
-var pathfind_1 = __webpack_require__(326);
-var orders_1 = __webpack_require__(328);
-var orderbook_1 = __webpack_require__(330);
-var settings_1 = __webpack_require__(332);
-var accountinfo_1 = __webpack_require__(333);
-var accountbyname_1 = __webpack_require__(334);
-var accountissues_1 = __webpack_require__(335);
-var accountinvoices_1 = __webpack_require__(336);
-var payment_channel_1 = __webpack_require__(337);
-var payment_1 = __webpack_require__(339);
-var trustline_1 = __webpack_require__(340);
-var order_1 = __webpack_require__(341);
-var ordercancellation_1 = __webpack_require__(342);
-var escrow_creation_1 = __webpack_require__(343);
-var escrow_execution_1 = __webpack_require__(344);
-var escrow_cancellation_1 = __webpack_require__(345);
-var settings_2 = __webpack_require__(346);
-var issue_set_1 = __webpack_require__(347);
-var sign_1 = __webpack_require__(348);
-var combine_1 = __webpack_require__(349);
-var submit_1 = __webpack_require__(350);
-var generate_address_1 = __webpack_require__(351);
-var address_fromSecret_1 = __webpack_require__(352);
-var ledgerhash_1 = __webpack_require__(353);
-var ledger_1 = __webpack_require__(354);
+var transactions_1 = __webpack_require__(253);
+var trustlines_1 = __webpack_require__(298);
+var balances_1 = __webpack_require__(300);
+var balance_sheet_1 = __webpack_require__(301);
+var pathfind_1 = __webpack_require__(302);
+var orders_1 = __webpack_require__(304);
+var orderbook_1 = __webpack_require__(306);
+var settings_1 = __webpack_require__(308);
+var account_info_1 = __webpack_require__(309);
+var account_by_name_1 = __webpack_require__(310);
+var account_issues_1 = __webpack_require__(311);
+var account_invoices_1 = __webpack_require__(312);
+var payment_1 = __webpack_require__(313);
+var trustline_1 = __webpack_require__(314);
+var order_1 = __webpack_require__(315);
+var ordercancellation_1 = __webpack_require__(316);
+var settings_2 = __webpack_require__(317);
+var issue_set_1 = __webpack_require__(318);
+var sign_1 = __webpack_require__(319);
+var combine_1 = __webpack_require__(320);
+var submit_1 = __webpack_require__(321);
+var generate_address_1 = __webpack_require__(322);
+var address_fromSecret_1 = __webpack_require__(323);
+var ledgerhash_1 = __webpack_require__(324);
+var ledger_1 = __webpack_require__(325);
 var rangeset_1 = __webpack_require__(70);
-var ledgerUtils = __webpack_require__(18);
+var ledgerUtils = __webpack_require__(15);
 var schemaValidator = __webpack_require__(63);
 // prevent access to non-validated ledger versions
 var RestrictedConnection = /** @class */ (function (_super) {
@@ -18666,20 +18643,16 @@ var CallAPI = /** @class */ (function (_super) {
         _this.getOrders = orders_1.default;
         _this.getOrderbook = orderbook_1.default;
         _this.getSettings = settings_1.default;
-        _this.getAccountInfo = accountinfo_1.default;
-        _this.getAccountByName = accountbyname_1.default;
-        _this.getAccountIssues = accountissues_1.default;
-        _this.getAccountInvoices = accountinvoices_1.default;
-        _this.getPaymentChannel = payment_channel_1.default;
+        _this.getAccountInfo = account_info_1.default;
+        _this.getAccountByName = account_by_name_1.default;
+        _this.getAccountIssues = account_issues_1.default;
+        _this.getAccountInvoices = account_invoices_1.default;
         _this.getLedger = ledger_1.default;
         _this.prepareIssueSet = issue_set_1.default;
         _this.preparePayment = payment_1.default;
         _this.prepareTrustline = trustline_1.default;
         _this.prepareOrder = order_1.default;
         _this.prepareOrderCancellation = ordercancellation_1.default;
-        _this.prepareEscrowCreation = escrow_creation_1.default;
-        _this.prepareEscrowExecution = escrow_execution_1.default;
-        _this.prepareEscrowCancellation = escrow_cancellation_1.default;
         _this.prepareSettings = settings_2.default;
         _this.sign = sign_1.default;
         _this.combine = combine_1.default;
@@ -18803,7 +18776,7 @@ exports.txFlagIndices = txFlagIndices;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var Validator = __webpack_require__(105).Validator;
 var errors_1 = __webpack_require__(36);
 var call_address_codec_1 = __webpack_require__(30);
@@ -18894,25 +18867,7 @@ function loadSchemas() {
         __webpack_require__(225),
         __webpack_require__(226),
         __webpack_require__(227),
-        __webpack_require__(228),
-        __webpack_require__(229),
-        __webpack_require__(230),
-        __webpack_require__(231),
-        __webpack_require__(232),
-        __webpack_require__(233),
-        __webpack_require__(234),
-        __webpack_require__(235),
-        __webpack_require__(236),
-        __webpack_require__(237),
-        __webpack_require__(238),
-        __webpack_require__(239),
-        __webpack_require__(240),
-        __webpack_require__(241),
-        __webpack_require__(242),
-        __webpack_require__(243),
-        __webpack_require__(244),
-        __webpack_require__(245),
-        __webpack_require__(246)
+        __webpack_require__(228)
     ];
     var titles = schemas.map(function (schema) { return schema.title; });
     var duplicates = _.keys(_.pickBy(_.countBy(titles), function (count) { return count > 1; }));
@@ -18959,7 +18914,7 @@ exports.schemaValidate = schemaValidate;
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var rotr32 = utils.rotr32;
 
 function ft_1(s, x, y, z) {
@@ -19015,7 +18970,7 @@ exports.g1_256 = g1_256;
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var common = __webpack_require__(32);
 var shaCommon = __webpack_require__(64);
 var assert = __webpack_require__(31);
@@ -19127,7 +19082,7 @@ SHA256.prototype._digest = function digest(enc) {
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var common = __webpack_require__(32);
 var assert = __webpack_require__(31);
 
@@ -19619,7 +19574,7 @@ module.exports = Array.isArray || function (arr) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 function mergeIntervals(intervals) {
     var stack = [[-Infinity, -Infinity]];
     _.sortBy(intervals, function (x) { return x[0]; }).forEach(function (interval) {
@@ -19680,7 +19635,7 @@ exports.default = RangeSet;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(18);
+var utils = __webpack_require__(15);
 var transaction_1 = __webpack_require__(50);
 var common_1 = __webpack_require__(1);
 function attachTransactionDate(connection, tx) {
@@ -24991,7 +24946,7 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*! decimal.js v5.0.8 https://github.com/MikeM
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {return typeof obj;} : function (obj) {return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;};var assert = __webpack_require__(2);
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {return typeof obj;} : function (obj) {return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;};var assert = __webpack_require__(3);
 var BN = __webpack_require__(25);
 var makeClass = __webpack_require__(4);var _require =
 
@@ -25072,7 +25027,7 @@ var makeClass = __webpack_require__(4);var _require =
 __webpack_require__(24),Field = _require.Field;var _require2 =
 __webpack_require__(54),BinarySerializer = _require2.BinarySerializer;var
 ObjectEndMarker = Field.ObjectEndMarker;var _require3 =
-__webpack_require__(19),SerializedType = _require3.SerializedType;
+__webpack_require__(17),SerializedType = _require3.SerializedType;
 
 var STObject = makeClass({
   mixins: SerializedType,
@@ -25139,11 +25094,11 @@ module.exports = {
 
 "use strict";
 
-var inherits = __webpack_require__(3)
-var MD5 = __webpack_require__(291)
-var RIPEMD160 = __webpack_require__(300)
-var sha = __webpack_require__(301)
-var Base = __webpack_require__(306)
+var inherits = __webpack_require__(2)
+var MD5 = __webpack_require__(267)
+var RIPEMD160 = __webpack_require__(276)
+var sha = __webpack_require__(277)
+var Base = __webpack_require__(282)
 
 function Hash (hash) {
   Base.call(this, 'digest')
@@ -25176,9 +25131,9 @@ module.exports = function createHash (alg) {
 
 "use strict";
 
-var Buffer = __webpack_require__(13).Buffer
-var Transform = __webpack_require__(292).Transform
-var inherits = __webpack_require__(3)
+var Buffer = __webpack_require__(11).Buffer
+var Transform = __webpack_require__(268).Transform
+var inherits = __webpack_require__(2)
 
 function throwIfNotStringOrBuffer (val, prefix) {
   if (!Buffer.isBuffer(val) && typeof val !== 'string') {
@@ -25308,7 +25263,7 @@ var Duplex;
 Readable.ReadableState = ReadableState;
 /*<replacement>*/
 
-var EE = __webpack_require__(17).EventEmitter;
+var EE = __webpack_require__(14).EventEmitter;
 
 var EElistenerCount = function EElistenerCount(emitter, type) {
   return emitter.listeners(type).length;
@@ -25336,7 +25291,7 @@ function _isUint8Array(obj) {
 /*<replacement>*/
 
 
-var debugUtil = __webpack_require__(293);
+var debugUtil = __webpack_require__(269);
 
 var debug;
 
@@ -25348,7 +25303,7 @@ if (debugUtil && debugUtil.debuglog) {
 /*</replacement>*/
 
 
-var BufferList = __webpack_require__(294);
+var BufferList = __webpack_require__(270);
 
 var destroyImpl = __webpack_require__(82);
 
@@ -25366,7 +25321,7 @@ var StringDecoder;
 var createReadableStreamAsyncIterator;
 var from;
 
-__webpack_require__(3)(Readable, Stream);
+__webpack_require__(2)(Readable, Stream);
 
 var errorOrDestroy = destroyImpl.errorOrDestroy;
 var kProxyEvents = ['error', 'close', 'destroy', 'pause', 'resume'];
@@ -26285,7 +26240,7 @@ Readable.prototype.wrap = function (stream) {
 if (typeof Symbol === 'function') {
   Readable.prototype[Symbol.asyncIterator] = function () {
     if (createReadableStreamAsyncIterator === undefined) {
-      createReadableStreamAsyncIterator = __webpack_require__(296);
+      createReadableStreamAsyncIterator = __webpack_require__(272);
     }
 
     return createReadableStreamAsyncIterator(this);
@@ -26387,7 +26342,7 @@ function endReadableNT(state, stream) {
 if (typeof Symbol === 'function') {
   Readable.from = function (iterable, opts) {
     if (from === undefined) {
-      from = __webpack_require__(297);
+      from = __webpack_require__(273);
     }
 
     return from(Readable, iterable, opts);
@@ -26401,13 +26356,13 @@ function indexOf(xs, x) {
 
   return -1;
 }
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14), __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), __webpack_require__(9)))
 
 /***/ }),
 /* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(17).EventEmitter;
+module.exports = __webpack_require__(14).EventEmitter;
 
 
 /***/ }),
@@ -26520,7 +26475,7 @@ module.exports = {
   undestroy: undestroy,
   errorOrDestroy: errorOrDestroy
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
 /* 83 */
@@ -26658,7 +26613,7 @@ var _require$codes = __webpack_require__(26).codes,
 
 var errorOrDestroy = destroyImpl.errorOrDestroy;
 
-__webpack_require__(3)(Writable, Stream);
+__webpack_require__(2)(Writable, Stream);
 
 function nop() {}
 
@@ -27257,7 +27212,7 @@ Writable.prototype._undestroy = destroyImpl.undestroy;
 Writable.prototype._destroy = function (err, cb) {
   cb(err);
 };
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14), __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), __webpack_require__(9)))
 
 /***/ }),
 /* 85 */
@@ -27331,7 +27286,7 @@ function config (name) {
   return String(val).toLowerCase() === 'true';
 }
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
 /* 86 */
@@ -27411,7 +27366,7 @@ var _require$codes = __webpack_require__(26).codes,
 
 var Duplex = __webpack_require__(27);
 
-__webpack_require__(3)(Transform, Duplex);
+__webpack_require__(2)(Transform, Duplex);
 
 function afterTransform(er, data) {
   var ts = this._transformState;
@@ -27552,9 +27507,9 @@ function done(stream, er, data) {
  *
  */
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var Hash = __webpack_require__(28)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var K = [
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
@@ -27685,9 +27640,9 @@ module.exports = Sha256
 /* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var Hash = __webpack_require__(28)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var K = [
   0x428a2f98, 0xd728ae22, 0x71374491, 0x23ef65cd,
@@ -27993,7 +27948,7 @@ var Duplex;
 Readable.ReadableState = ReadableState;
 
 /*<replacement>*/
-var EE = __webpack_require__(17).EventEmitter;
+var EE = __webpack_require__(14).EventEmitter;
 
 var EElistenerCount = function (emitter, type) {
   return emitter.listeners(type).length;
@@ -28019,11 +27974,11 @@ function _isUint8Array(obj) {
 
 /*<replacement>*/
 var util = Object.create(__webpack_require__(35));
-util.inherits = __webpack_require__(3);
+util.inherits = __webpack_require__(2);
 /*</replacement>*/
 
 /*<replacement>*/
-var debugUtil = __webpack_require__(308);
+var debugUtil = __webpack_require__(284);
 var debug = void 0;
 if (debugUtil && debugUtil.debuglog) {
   debug = debugUtil.debuglog('stream');
@@ -28032,7 +27987,7 @@ if (debugUtil && debugUtil.debuglog) {
 }
 /*</replacement>*/
 
-var BufferList = __webpack_require__(309);
+var BufferList = __webpack_require__(285);
 var destroyImpl = __webpack_require__(91);
 var StringDecoder;
 
@@ -28053,7 +28008,7 @@ function prependListener(emitter, event, fn) {
 }
 
 function ReadableState(options, stream) {
-  Duplex = Duplex || __webpack_require__(22);
+  Duplex = Duplex || __webpack_require__(21);
 
   options = options || {};
 
@@ -28130,7 +28085,7 @@ function ReadableState(options, stream) {
 }
 
 function Readable(options) {
-  Duplex = Duplex || __webpack_require__(22);
+  Duplex = Duplex || __webpack_require__(21);
 
   if (!(this instanceof Readable)) return new Readable(options);
 
@@ -28971,13 +28926,13 @@ function indexOf(xs, x) {
   }
   return -1;
 }
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14), __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), __webpack_require__(9)))
 
 /***/ }),
 /* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(17).EventEmitter;
+module.exports = __webpack_require__(14).EventEmitter;
 
 
 /***/ }),
@@ -29132,11 +29087,11 @@ module.exports = {
 
 module.exports = Transform;
 
-var Duplex = __webpack_require__(22);
+var Duplex = __webpack_require__(21);
 
 /*<replacement>*/
 var util = Object.create(__webpack_require__(35));
-util.inherits = __webpack_require__(3);
+util.inherits = __webpack_require__(2);
 /*</replacement>*/
 
 util.inherits(Transform, Duplex);
@@ -29285,9 +29240,9 @@ function done(stream, er, data) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var makeClass = __webpack_require__(4);var _require =
-__webpack_require__(21),Hash256 = _require.Hash256;var _require2 =
+__webpack_require__(20),Hash256 = _require.Hash256;var _require2 =
 __webpack_require__(33),HashPrefix = _require2.HashPrefix;var _require3 =
 __webpack_require__(42),Hasher = _require3.Sha512Half;
 
@@ -29799,7 +29754,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var api_1 = __webpack_require__(61);
 exports.CallAPI = api_1.CallAPI;
 // Broadcast api is experimental
-var broadcast_1 = __webpack_require__(356);
+var broadcast_1 = __webpack_require__(327);
 exports.CallAPIBroadcast = broadcast_1.CallAPIBroadcast;
 
 
@@ -29954,7 +29909,6 @@ exports.getBalanceSheet = _.partial(validateOptions, 'getBalanceSheetParameters'
 exports.getOrders = _.partial(validateOptions, 'getOrdersParameters');
 exports.getOrderbook = _.partial(validateOptions, 'getOrderbookParameters');
 exports.getTransaction = _.partial(validateOptions, 'getTransactionParameters');
-exports.getPaymentChannel = _.partial(validateOptions, 'getPaymentChannelParameters');
 exports.getLedger = _.partial(validateOptions, 'getLedgerParameters');
 exports.preparePayment = _.partial(schema_validator_1.schemaValidate, 'preparePaymentParameters');
 exports.prepareOrder = _.partial(schema_validator_1.schemaValidate, 'prepareOrderParameters');
@@ -29962,19 +29916,11 @@ exports.prepareOrderCancellation = _.partial(schema_validator_1.schemaValidate, 
 exports.prepareTrustline = _.partial(schema_validator_1.schemaValidate, 'prepareTrustlineParameters');
 exports.prepareSettings = _.partial(schema_validator_1.schemaValidate, 'prepareSettingsParameters');
 exports.prepareIssueSet = _.partial(schema_validator_1.schemaValidate, 'prepareIssueSetParameters');
-exports.prepareEscrowCreation = _.partial(schema_validator_1.schemaValidate, 'prepareEscrowCreationParameters');
-exports.prepareEscrowCancellation = _.partial(schema_validator_1.schemaValidate, 'prepareEscrowCancellationParameters');
-exports.prepareEscrowExecution = _.partial(schema_validator_1.schemaValidate, 'prepareEscrowExecutionParameters');
-exports.preparePaymentChannelCreate = _.partial(schema_validator_1.schemaValidate, 'preparePaymentChannelCreateParameters');
-exports.preparePaymentChannelFund = _.partial(schema_validator_1.schemaValidate, 'preparePaymentChannelFundParameters');
-exports.preparePaymentChannelClaim = _.partial(schema_validator_1.schemaValidate, 'preparePaymentChannelClaimParameters');
 exports.sign = _.partial(schema_validator_1.schemaValidate, 'signParameters');
 exports.combine = _.partial(schema_validator_1.schemaValidate, 'combineParameters');
 exports.submit = _.partial(schema_validator_1.schemaValidate, 'submitParameters');
 exports.computeLedgerHash = _.partial(schema_validator_1.schemaValidate, 'computeLedgerHashParameters');
 exports.generateAddress = _.partial(schema_validator_1.schemaValidate, 'generateAddressParameters');
-exports.signPaymentChannelClaim = _.partial(schema_validator_1.schemaValidate, 'signPaymentChannelClaimParameters');
-exports.verifyPaymentChannelClaim = _.partial(schema_validator_1.schemaValidate, 'verifyPaymentChannelClaimParameters');
 exports.apiOptions = _.partial(schema_validator_1.schemaValidate, 'api-options');
 exports.instructions = _.partial(schema_validator_1.schemaValidate, 'instructions');
 
@@ -30085,9 +30031,9 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 var Validator = module.exports.Validator = __webpack_require__(106);
 
-module.exports.ValidatorResult = __webpack_require__(23).ValidatorResult;
-module.exports.ValidationError = __webpack_require__(23).ValidationError;
-module.exports.SchemaError = __webpack_require__(23).SchemaError;
+module.exports.ValidatorResult = __webpack_require__(22).ValidatorResult;
+module.exports.ValidationError = __webpack_require__(22).ValidationError;
+module.exports.SchemaError = __webpack_require__(22).SchemaError;
 module.exports.SchemaScanResult = __webpack_require__(47).SchemaScanResult;
 module.exports.scan = __webpack_require__(47).scan;
 
@@ -30107,7 +30053,7 @@ module.exports.validate = function (instance, schema, options) {
 var urilib = __webpack_require__(29);
 
 var attribute = __webpack_require__(112);
-var helpers = __webpack_require__(23);
+var helpers = __webpack_require__(22);
 var scanSchema = __webpack_require__(47).scan;
 var ValidatorResult = helpers.ValidatorResult;
 var SchemaError = helpers.SchemaError;
@@ -30961,7 +30907,7 @@ module.exports = Validator;
 
 }(this));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(46)(module), __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(46)(module), __webpack_require__(12)))
 
 /***/ }),
 /* 108 */
@@ -31187,7 +31133,7 @@ var objectKeys = Object.keys || function (obj) {
 "use strict";
 
 
-var helpers = __webpack_require__(23);
+var helpers = __webpack_require__(22);
 
 /** @type ValidatorResult */
 var ValidatorResult = helpers.ValidatorResult;
@@ -32028,7 +31974,7 @@ exports.sha512 = __webpack_require__(66);
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var common = __webpack_require__(32);
 var shaCommon = __webpack_require__(64);
 
@@ -32109,7 +32055,7 @@ SHA1.prototype._digest = function digest(enc) {
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var SHA256 = __webpack_require__(65);
 
 function SHA224() {
@@ -32146,7 +32092,7 @@ SHA224.prototype._digest = function digest(enc) {
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 
 var SHA512 = __webpack_require__(66);
 
@@ -32188,7 +32134,7 @@ SHA384.prototype._digest = function digest(enc) {
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var common = __webpack_require__(32);
 
 var rotl32 = utils.rotl32;
@@ -32341,7 +32287,7 @@ var sh = [
 "use strict";
 
 
-var utils = __webpack_require__(15);
+var utils = __webpack_require__(13);
 var assert = __webpack_require__(31);
 
 function Hmac(hash, key, enc) {
@@ -32845,7 +32791,7 @@ module.exports = {"_from":"elliptic@^5.1.0","_id":"elliptic@5.2.1","_inBundle":f
 
 
 var utils = exports;
-var bn = __webpack_require__(12);
+var bn = __webpack_require__(10);
 
 utils.assert = function assert(val, msg) {
   if (!val)
@@ -33024,7 +32970,7 @@ utils.intFromLE = intFromLE;
 "use strict";
 
 
-var hash = __webpack_require__(20);
+var hash = __webpack_require__(18);
 var elliptic = __webpack_require__(8);
 var utils = elliptic.utils;
 var assert = utils.assert;
@@ -33145,7 +33091,7 @@ HmacDRBG.prototype.generate = function generate(len, enc, add, addEnc) {
 "use strict";
 
 
-var bn = __webpack_require__(12);
+var bn = __webpack_require__(10);
 var elliptic = __webpack_require__(8);
 var utils = elliptic.utils;
 var getNAF = utils.getNAF;
@@ -33505,8 +33451,8 @@ BasePoint.prototype.dblp = function dblp(k) {
 
 var curve = __webpack_require__(38);
 var elliptic = __webpack_require__(8);
-var bn = __webpack_require__(12);
-var inherits = __webpack_require__(3);
+var bn = __webpack_require__(10);
+var inherits = __webpack_require__(2);
 var Base = curve.base;
 
 var assert = elliptic.utils.assert;
@@ -34418,8 +34364,8 @@ JPoint.prototype.isInfinity = function isInfinity() {
 
 
 var curve = __webpack_require__(38);
-var bn = __webpack_require__(12);
-var inherits = __webpack_require__(3);
+var bn = __webpack_require__(10);
+var inherits = __webpack_require__(2);
 var Base = curve.base;
 
 var elliptic = __webpack_require__(8);
@@ -34602,8 +34548,8 @@ Point.prototype.getX = function getX() {
 
 var curve = __webpack_require__(38);
 var elliptic = __webpack_require__(8);
-var bn = __webpack_require__(12);
-var inherits = __webpack_require__(3);
+var bn = __webpack_require__(10);
+var inherits = __webpack_require__(2);
 var Base = curve.base;
 
 var assert = elliptic.utils.assert;
@@ -35015,7 +34961,7 @@ Point.prototype.mixedAdd = Point.prototype.add;
 
 var curves = exports;
 
-var hash = __webpack_require__(20);
+var hash = __webpack_require__(18);
 var elliptic = __webpack_require__(8);
 
 var assert = elliptic.utils.assert;
@@ -36011,7 +35957,7 @@ module.exports = {
 "use strict";
 
 
-var bn = __webpack_require__(12);
+var bn = __webpack_require__(10);
 var elliptic = __webpack_require__(8);
 var utils = elliptic.utils;
 var assert = utils.assert;
@@ -36228,7 +36174,7 @@ EC.prototype.getKeyRecoveryParam = function(e, signature, Q, enc) {
 "use strict";
 
 
-var bn = __webpack_require__(12);
+var bn = __webpack_require__(10);
 
 function KeyPair(ec, options) {
   this.ec = ec;
@@ -36342,7 +36288,7 @@ KeyPair.prototype.inspect = function inspect() {
 "use strict";
 
 
-var bn = __webpack_require__(12);
+var bn = __webpack_require__(10);
 
 var elliptic = __webpack_require__(8);
 var utils = elliptic.utils;
@@ -36484,7 +36430,7 @@ Signature.prototype.toDER = function toDER(enc) {
 "use strict";
 
 
-var hash = __webpack_require__(20);
+var hash = __webpack_require__(18);
 var elliptic = __webpack_require__(8);
 var utils = elliptic.utils;
 var assert = utils.assert;
@@ -36712,7 +36658,7 @@ module.exports = KeyPair;
 "use strict";
 
 
-var bn = __webpack_require__(12);
+var bn = __webpack_require__(10);
 var elliptic = __webpack_require__(8);
 var utils = elliptic.utils;
 var assert = utils.assert;
@@ -36789,8 +36735,8 @@ var _createClass = __webpack_require__(140)['default'];
 
 var _classCallCheck = __webpack_require__(144)['default'];
 
-var hashjs = __webpack_require__(20);
-var BigNum = __webpack_require__(12);
+var hashjs = __webpack_require__(18);
+var BigNum = __webpack_require__(10);
 
 module.exports = (function () {
   function Sha512() {
@@ -36915,9 +36861,9 @@ exports.__esModule = true;
 "use strict";
  // eslint-disable-line strict
 
-var assert = __webpack_require__(2);
-var hashjs = __webpack_require__(20);
-var BN = __webpack_require__(12);
+var assert = __webpack_require__(3);
+var hashjs = __webpack_require__(18);
+var BN = __webpack_require__(10);
 
 function bytesToHex(a) {
   return a.map(function (byteValue) {
@@ -37180,382 +37126,274 @@ module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"p
 /* 184 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"escrowCancellation","link":"escrow-cancellation","type":"object","properties":{"memos":{"$ref":"memos"},"owner":{"$ref":"address","description":"The address of the owner of the escrow to cancel."},"escrowSequence":{"$ref":"sequence","description":"The [account sequence number](#account-sequence-number) of the [Escrow Creation](#escrow-creation) transaction for the escrow to cancel."}},"required":["owner","escrowSequence"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"orderCancellation","link":"order-cancellation","type":"object","properties":{"orderSequence":{"$ref":"sequence","description":"The [account sequence number](#account-sequence-number) of the order to cancel."},"memos":{"$ref":"memos"}},"required":["orderSequence"],"additionalProperties":true}
 
 /***/ }),
 /* 185 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"orderCancellation","link":"order-cancellation","type":"object","properties":{"orderSequence":{"$ref":"sequence","description":"The [account sequence number](#account-sequence-number) of the order to cancel."},"memos":{"$ref":"memos"}},"required":["orderSequence"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"order","link":"order","type":"object","properties":{"direction":{"type":"string","enum":["buy","sell"],"description":"Equal to \"buy\" for buy orders and \"sell\" for sell orders."},"quantity":{"$ref":"amount","description":"The amount of currency to buy or sell."},"totalPrice":{"$ref":"amount","description":"The total price to be paid for the `quantity` to be bought or sold."},"immediateOrCancel":{"type":"boolean","description":"Treat the offer as an [Immediate or Cancel order](http://en.wikipedia.org/wiki/Immediate_or_cancel). If enabled, the offer will never become a ledger node: it only attempts to match existing offers in the ledger."},"fillOrKill":{"type":"boolean","description":"Treat the offer as a [Fill or Kill order](http://en.wikipedia.org/wiki/Fill_or_kill). Only attempt to match existing offers in the ledger, and only do so if the entire quantity can be exchanged."},"passive":{"description":"If enabled, the offer will not consume offers that exactly match it, and instead becomes an Offer node in the ledger. It will still consume offers that cross it.","type":"boolean"},"expirationTime":{"type":"string","format":"date-time","description":"Time after which the offer is no longer active, as an [ISO 8601 date-time](https://en.wikipedia.org/wiki/ISO_8601)."},"orderToReplace":{"$ref":"sequence","description":"The [account sequence number](#account-sequence-number) of an order to cancel before the new order is created, effectively replacing the old order."},"memos":{"$ref":"memos"}},"required":["direction","quantity","totalPrice"],"additionalProperties":true,"not":{"description":"immediateOrCancel and fillOrKill are mutually exclusive","required":["immediateOrCancel","fillOrKill"]}}
 
 /***/ }),
 /* 186 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"order","link":"order","type":"object","properties":{"direction":{"type":"string","enum":["buy","sell"],"description":"Equal to \"buy\" for buy orders and \"sell\" for sell orders."},"quantity":{"$ref":"amount","description":"The amount of currency to buy or sell."},"totalPrice":{"$ref":"amount","description":"The total price to be paid for the `quantity` to be bought or sold."},"immediateOrCancel":{"type":"boolean","description":"Treat the offer as an [Immediate or Cancel order](http://en.wikipedia.org/wiki/Immediate_or_cancel). If enabled, the offer will never become a ledger node: it only attempts to match existing offers in the ledger."},"fillOrKill":{"type":"boolean","description":"Treat the offer as a [Fill or Kill order](http://en.wikipedia.org/wiki/Fill_or_kill). Only attempt to match existing offers in the ledger, and only do so if the entire quantity can be exchanged."},"passive":{"description":"If enabled, the offer will not consume offers that exactly match it, and instead becomes an Offer node in the ledger. It will still consume offers that cross it.","type":"boolean"},"expirationTime":{"type":"string","format":"date-time","description":"Time after which the offer is no longer active, as an [ISO 8601 date-time](https://en.wikipedia.org/wiki/ISO_8601)."},"orderToReplace":{"$ref":"sequence","description":"The [account sequence number](#account-sequence-number) of an order to cancel before the new order is created, effectively replacing the old order."},"memos":{"$ref":"memos"}},"required":["direction","quantity","totalPrice"],"additionalProperties":true,"not":{"description":"immediateOrCancel and fillOrKill are mutually exclusive","required":["immediateOrCancel","fillOrKill"]}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"trustline","link":"trustline","type":"object","properties":{"currency":{"$ref":"currency","description":"The currency this trustline applies to."},"counterparty":{"$ref":"address","description":"The address of the account this trustline extends trust to."},"limit":{"$ref":"value","description":"The maximum amount that the owner of the trustline can be owed through the trustline."},"qualityIn":{"$ref":"quality","description":"Incoming balances on this trustline are valued at this ratio."},"qualityOut":{"$ref":"quality","description":"Outgoing balances on this trustline are valued at this ratio."},"callingDisabled":{"type":"boolean","description":"If true, payments cannot call through this trustline."},"authorized":{"type":"boolean","description":"If true, authorize the counterparty to hold issuances from this account."},"frozen":{"type":"boolean","description":"If true, the trustline is frozen, which means that funds can only be sent to the owner."},"memos":{"$ref":"memos"}},"required":["currency","counterparty","limit"],"additionalProperties":true}
 
 /***/ }),
 /* 187 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"escrowExecution","link":"escrow-execution","type":"object","properties":{"memos":{"$ref":"memos"},"owner":{"$ref":"address","description":"The address of the owner of the escrow to execute."},"escrowSequence":{"$ref":"sequence","description":"The [account sequence number](#account-sequence-number) of the [Escrow Creation](#escrow-creation) transaction for the escrow to execute."},"condition":{"type":"string","description":"A hex value representing a [PREIMAGE-SHA-256 crypto-condition](https://tools.ietf.org/html/draft-thomas-crypto-conditions-02#section-8.1). This must match the original `condition` from the escrow creation transaction.","pattern":"^[A-F0-9]{0,256}$"},"fulfillment":{"type":"string","description":"A hex value representing the [PREIMAGE-SHA-256 crypto-condition](https://tools.ietf.org/html/draft-thomas-crypto-conditions-02#section-8.1) fulfillment for `condition`.","pattern":"^[A-F0-9]+$"}},"required":["owner","escrowSequence"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"sign","type":"object","properties":{"signedTransaction":{"type":"string","pattern":"^[A-F0-9]+$","description":"The signed transaction represented as an uppercase hexadecimal string."},"id":{"$ref":"id","description":"The [Transaction ID](#transaction-id) of the signed transaction."}},"required":["signedTransaction","id"],"additionalProperties":true}
 
 /***/ }),
 /* 188 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"escrowCreation","link":"escrow-creation","type":"object","properties":{"amount":{"$ref":"value","description":"Amount of CALL for sender to escrow."},"destination":{"$ref":"address","description":"Address to receive escrowed CALL."},"memos":{"$ref":"memos"},"condition":{"type":"string","description":"A hex value representing a [PREIMAGE-SHA-256 crypto-condition](https://tools.ietf.org/html/draft-thomas-crypto-conditions-02#section-8.1). If present, `fulfillment` is required upon execution.","pattern":"^[A-F0-9]{0,256}$"},"allowCancelAfter":{"type":"string","format":"date-time","description":"If present, the escrow may be cancelled after this time."},"allowExecuteAfter":{"type":"string","format":"date-time","description":"If present, the escrow can not be executed before this time."},"sourceTag":{"$ref":"tag","description":"Source tag."},"destinationTag":{"$ref":"tag","description":"Destination tag."}},"required":["amount","destination"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"submit","type":"object","properties":{"resultCode":{"type":"string","description":"The result code returned by called. [List of transaction responses](https://call.com/build/transactions/#full-transaction-response-list)"},"resultMessage":{"type":"string","description":"Human-readable explanation of the status of the transaction."}},"required":["resultCode","resultMessage"],"additionalProperties":true}
 
 /***/ }),
 /* 189 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"paymentChannelCreate","link":"payment-channel-create","type":"object","properties":{"amount":{"$ref":"value","description":"Amount of CALL for sender to set aside in this channel."},"destination":{"$ref":"address","description":"Address to receive CALL claims against this channel."},"settleDelay":{"type":"number","description":"Amount of seconds the source address must wait before closing the channel if it has unclaimed CALL."},"publicKey":{"$ref":"publicKey","description":"Public key of the key pair the source will use to sign claims against this channel."},"cancelAfter":{"type":"string","format":"date-time","description":"Time when this channel expires."},"sourceTag":{"$ref":"tag","description":"Source tag."},"destinationTag":{"$ref":"tag","description":"Destination tag."}},"required":["amount","destination","settleDelay","publicKey"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getAccountInfo","type":"object","properties":{"sequence":{"$ref":"sequence","description":"The next (smallest unused) sequence number for this account."},"callBalance":{"$ref":"value","description":"The CALL balance owned by the account."},"ownerCount":{"type":"integer","minimum":0,"description":"Number of other ledger entries (specifically, trust lines and offers) attributed to this account. This is used to calculate the total reserve required to use the account."},"previousInitiatedTransactionID":{"$ref":"hash256","description":"Hash value representing the most recent transaction that was initiated by this account."},"previousAffectingTransactionID":{"$ref":"hash256","description":"Hash value representing the most recent transaction that affected this account node directly. **Note:** This does not include changes to the account’s trust lines and offers."},"previousAffectingTransactionLedgerVersion":{"$ref":"ledgerVersion","description":"The ledger version that the transaction identified by the `previousAffectingTransactionID` was validated in."}},"required":["sequence","callBalance","ownerCount","previousAffectingTransactionID","previousAffectingTransactionLedgerVersion"],"additionalProperties":true}
 
 /***/ }),
 /* 190 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"paymentChannelFund","link":"payment-channel-fund","type":"object","properties":{"amount":{"$ref":"value","description":"Amount of CALL to fund the channel with."},"channel":{"$ref":"hash256","description":"256-bit hexadecimal channel identifier."},"expiration":{"type":"string","format":"date-time","description":"New expiration for this channel."}},"required":["amount","channel"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalances","type":"array","items":{"$ref":"balance"}}
 
 /***/ }),
 /* 191 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"paymentChannelClaim","link":"payment-channel-claim","type":"object","properties":{"channel":{"$ref":"hash256","description":"256-bit hexadecimal channel identifier."},"amount":{"$ref":"value","description":"CALL balance of this channel after claim is processed."},"balance":{"$ref":"value","description":"Amount of CALL authorized by signature."},"signature":{"$ref":"signature","description":"Signature of this claim."},"publicKey":{"$ref":"publicKey","description":"Public key of the channel's sender"},"renew":{"type":"boolean","description":"Clear the channel's expiration time."},"close":{"type":"boolean","description":"Request to close the channel."}},"required":["channel"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalanceSheet","description":"getBalanceSheet response","type":"object","properties":{"balances":{"type":"array","items":{"$ref":"amount"},"description":"Amounts issued to the hotwallet accounts from the request. The keys are hot wallet addresses and the values are arrays of currency amounts they hold. The issuer (omitted from the currency amounts) is the account from the request."},"assets":{"type":"array","items":{"$ref":"amount"},"description":"Total amounts held that are issued by others. For the recommended gateway configuration, there should be none."},"obligations":{"type":"array","items":{"type":"object","required":["currency","value"],"additionalProperties":true,"properties":{"currency":{"$ref":"currency"},"value":{"$ref":"value"}},"description":"An amount that is owed."},"description":"Total amounts issued to accounts that are not hot wallets, as a map of currencies to the total value issued."}},"additionalProperties":true}
 
 /***/ }),
 /* 192 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"trustline","link":"trustline","type":"object","properties":{"currency":{"$ref":"currency","description":"The currency this trustline applies to."},"counterparty":{"$ref":"address","description":"The address of the account this trustline extends trust to."},"limit":{"$ref":"value","description":"The maximum amount that the owner of the trustline can be owed through the trustline."},"qualityIn":{"$ref":"quality","description":"Incoming balances on this trustline are valued at this ratio."},"qualityOut":{"$ref":"quality","description":"Outgoing balances on this trustline are valued at this ratio."},"callingDisabled":{"type":"boolean","description":"If true, payments cannot call through this trustline."},"authorized":{"type":"boolean","description":"If true, authorize the counterparty to hold issuances from this account."},"frozen":{"type":"boolean","description":"If true, the trustline is frozen, which means that funds can only be sent to the owner."},"memos":{"$ref":"memos"}},"required":["currency","counterparty","limit"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getLedger","type":"object","properties":{"stateHash":{"$ref":"hash256","description":"Hash of all state information in this ledger."},"closeTime":{"type":"string","format":"date-time","description":"The time at which this ledger was closed."},"closeTimeResolution":{"type":"integer","minimum":1,"description":"Approximate number of seconds between closing one ledger version and closing the next one."},"closeFlags":{"type":"integer","minimum":0,"description":"A bit-map of flags relating to the closing of this ledger. Currently, the ledger has only one flag defined for `closeFlags`: **sLCF_NoConsensusTime** (value 1). If this flag is enabled, it means that validators were in conflict regarding the correct close time for the ledger, but built otherwise the same ledger, so they declared consensus while \"agreeing to disagree\" on the close time. In this case, the consensus ledger contains a `closeTime` value that is 1 second after that of the previous ledger. (In this case, there is no official close time, but the actual real-world close time is probably 3-6 seconds later than the specified `closeTime`.)"},"ledgerHash":{"$ref":"hash256","description":"Unique identifying hash of the entire ledger."},"ledgerVersion":{"$ref":"ledgerVersion","description":"The ledger version of this ledger."},"parentLedgerHash":{"$ref":"hash256","description":"Unique identifying hash of the ledger that came immediately before this one."},"parentCloseTime":{"type":"string","format":"date-time","description":"The time at which the previous ledger was closed."},"totalDrops":{"$ref":"value","description":"Total number of drops (1/1,000,000th of an CALL) in the network, as a quoted integer. (This decreases as transaction fees cause CALL to be destroyed.)"},"transactionHash":{"$ref":"hash256","description":"Hash of the transaction information included in this ledger."},"transactions":{"description":"Array of all transactions that were validated in this ledger. Transactions are represented in the same format as the return value of [getTransaction](#gettransaction).","type":"array","items":{"$ref":"getTransaction","description":"A transaction in the same format as the return value of [getTransaction](#gettransaction)."}},"rawTransactions":{"type":"string","description":"A JSON string containing called format transaction JSON for all transactions that were validated in this ledger."},"transactionHashes":{"description":"An array of hashes of all transactions that were validated in this ledger.","type":"array","items":{"$ref":"id"}},"rawState":{"type":"string","description":"A JSON string containing all state data for this ledger in called JSON format."},"stateHashes":{"description":"An array of hashes of all state data in this ledger.","type":"array","items":{"$ref":"hash256"}}},"required":["stateHash","closeTime","closeTimeResolution","closeFlags","ledgerHash","ledgerVersion","parentLedgerHash","parentCloseTime","totalDrops","transactionHash"],"additionalProperties":true}
 
 /***/ }),
 /* 193 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"sign","type":"object","properties":{"signedTransaction":{"type":"string","pattern":"^[A-F0-9]+$","description":"The signed transaction represented as an uppercase hexadecimal string."},"id":{"$ref":"id","description":"The [Transaction ID](#transaction-id) of the signed transaction."}},"required":["signedTransaction","id"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrderbook","type":"object","properties":{"bids":{"$ref":"orderbookOrders","description":"The buy orders in the order book."},"asks":{"$ref":"orderbookOrders","description":"The sell orders in the order book."}},"required":["bids","asks"],"additionalProperties":true}
 
 /***/ }),
 /* 194 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"submit","type":"object","properties":{"resultCode":{"type":"string","description":"The result code returned by called. [List of transaction responses](https://call.com/build/transactions/#full-transaction-response-list)"},"resultMessage":{"type":"string","description":"Human-readable explanation of the status of the transaction."}},"required":["resultCode","resultMessage"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrders","type":"array","items":{"type":"object","properties":{"specification":{"$ref":"order","description":"An order specification that would create an order equivalent to the current state of this order."},"properties":{"description":"Properties of the order not in the specification.","type":"object","properties":{"maker":{"$ref":"address","description":"The address of the account that submitted the order."},"sequence":{"$ref":"sequence","description":"The account sequence number of the transaction that created this order."},"makerExchangeRate":{"$ref":"value","description":"The exchange rate from the point of view of the account that submitted the order (also known as \"quality\")."}},"required":["maker","sequence","makerExchangeRate"],"addtionalProperties":false}},"required":["specification","properties"],"additionalProperties":true}}
 
 /***/ }),
 /* 195 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getAccountInfo","type":"object","properties":{"sequence":{"$ref":"sequence","description":"The next (smallest unused) sequence number for this account."},"callBalance":{"$ref":"value","description":"The CALL balance owned by the account."},"ownerCount":{"type":"integer","minimum":0,"description":"Number of other ledger entries (specifically, trust lines and offers) attributed to this account. This is used to calculate the total reserve required to use the account."},"previousInitiatedTransactionID":{"$ref":"hash256","description":"Hash value representing the most recent transaction that was initiated by this account."},"previousAffectingTransactionID":{"$ref":"hash256","description":"Hash value representing the most recent transaction that affected this account node directly. **Note:** This does not include changes to the account’s trust lines and offers."},"previousAffectingTransactionLedgerVersion":{"$ref":"ledgerVersion","description":"The ledger version that the transaction identified by the `previousAffectingTransactionID` was validated in."}},"required":["sequence","callBalance","ownerCount","previousAffectingTransactionID","previousAffectingTransactionLedgerVersion"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"orderChange","type":"object","description":"A change to an order.","properties":{"direction":{"type":"string","enum":["buy","sell"],"description":"Equal to \"buy\" for buy orders and \"sell\" for sell orders."},"quantity":{"$ref":"amount","description":"The amount to be bought or sold by the maker."},"totalPrice":{"$ref":"amount","description":"The total amount to be paid or received by the taker."},"makerExchangeRate":{"$ref":"value","description":"The exchange rate between the `quantity` currency and the `totalPrice` currency from the point of view of the maker."},"sequence":{"$ref":"sequence","description":"The order sequence number, used to identify the order for cancellation"},"status":{"enum":["created","filled","partially-filled","cancelled"],"description":"The status of the order. One of \"created\", \"filled\", \"partially-filled\", \"cancelled\"."},"expirationTime":{"type":"string","format":"date-time","description":"The time after which the order expires, if any."}},"required":["direction","quantity","totalPrice","sequence","status"],"additionalProperties":true}
 
 /***/ }),
 /* 196 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalances","type":"array","items":{"$ref":"balance"}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepare","description":"Result of prepare function","type":"object","properties":{"txJSON":{"type":"string","description":"The prepared transaction in called JSON format."},"instructions":{"description":"The instructions for how to execute the transaction after adding automatic defaults.","type":"object","properties":{"fee":{"$ref":"value","description":"An exact fee to pay for the transaction. See [Transaction Fees](#transaction-fees) for more information."},"sequence":{"$ref":"sequence","description":"The initiating account's sequence number for this transaction."},"maxLedgerVersion":{"oneOf":[{"$ref":"ledgerVersion"},{"type":"null"}],"description":"The highest ledger version that the transaction can be included in. Set to `null` if there is no maximum."}},"additionalProperties":true,"required":["fee","sequence","maxLedgerVersion"]}},"additionalProperties":true,"required":["txJSON","instructions"]}
 
 /***/ }),
 /* 197 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalanceSheet","description":"getBalanceSheet response","type":"object","properties":{"balances":{"type":"array","items":{"$ref":"amount"},"description":"Amounts issued to the hotwallet accounts from the request. The keys are hot wallet addresses and the values are arrays of currency amounts they hold. The issuer (omitted from the currency amounts) is the account from the request."},"assets":{"type":"array","items":{"$ref":"amount"},"description":"Total amounts held that are issued by others. For the recommended gateway configuration, there should be none."},"obligations":{"type":"array","items":{"type":"object","required":["currency","value"],"additionalProperties":true,"properties":{"currency":{"$ref":"currency"},"value":{"$ref":"value"}},"description":"An amount that is owed."},"description":"Total amounts issued to accounts that are not hot wallets, as a map of currencies to the total value issued."}},"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"ledgerEvent","description":"A ledger event message","type":"object","properties":{"baseFeeCALL":{"$ref":"value","description":"Base fee, in CALL."},"ledgerHash":{"$ref":"hash256","description":"Unique hash of the ledger that was closed, as hex."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Ledger version of the ledger that closed."},"ledgerTimestamp":{"type":"string","format":"date-time","description":"The time at which this ledger closed."},"reserveBaseCALL":{"$ref":"value","description":"The minimum reserve, in CALL, that is required for an account."},"reserveIncrementCALL":{"$ref":"value","description":"The increase in account reserve that is added for each item the account owns, such as offers or trust lines."},"transactionCount":{"type":"integer","minimum":0,"description":"Number of new transactions included in this ledger."},"validatedLedgerVersions":{"type":"string","description":"Range of ledgers that the server has available. This may be discontiguous."}},"addtionalProperties":false,"required":["baseFeeCALL","ledgerHash","ledgerTimestamp","reserveBaseCALL","reserveIncrementCALL","transactionCount","ledgerVersion","validatedLedgerVersions"]}
 
 /***/ }),
 /* 198 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getLedger","type":"object","properties":{"stateHash":{"$ref":"hash256","description":"Hash of all state information in this ledger."},"closeTime":{"type":"string","format":"date-time","description":"The time at which this ledger was closed."},"closeTimeResolution":{"type":"integer","minimum":1,"description":"Approximate number of seconds between closing one ledger version and closing the next one."},"closeFlags":{"type":"integer","minimum":0,"description":"A bit-map of flags relating to the closing of this ledger. Currently, the ledger has only one flag defined for `closeFlags`: **sLCF_NoConsensusTime** (value 1). If this flag is enabled, it means that validators were in conflict regarding the correct close time for the ledger, but built otherwise the same ledger, so they declared consensus while \"agreeing to disagree\" on the close time. In this case, the consensus ledger contains a `closeTime` value that is 1 second after that of the previous ledger. (In this case, there is no official close time, but the actual real-world close time is probably 3-6 seconds later than the specified `closeTime`.)"},"ledgerHash":{"$ref":"hash256","description":"Unique identifying hash of the entire ledger."},"ledgerVersion":{"$ref":"ledgerVersion","description":"The ledger version of this ledger."},"parentLedgerHash":{"$ref":"hash256","description":"Unique identifying hash of the ledger that came immediately before this one."},"parentCloseTime":{"type":"string","format":"date-time","description":"The time at which the previous ledger was closed."},"totalDrops":{"$ref":"value","description":"Total number of drops (1/1,000,000th of an CALL) in the network, as a quoted integer. (This decreases as transaction fees cause CALL to be destroyed.)"},"transactionHash":{"$ref":"hash256","description":"Hash of the transaction information included in this ledger."},"transactions":{"description":"Array of all transactions that were validated in this ledger. Transactions are represented in the same format as the return value of [getTransaction](#gettransaction).","type":"array","items":{"$ref":"getTransaction","description":"A transaction in the same format as the return value of [getTransaction](#gettransaction)."}},"rawTransactions":{"type":"string","description":"A JSON string containing called format transaction JSON for all transactions that were validated in this ledger."},"transactionHashes":{"description":"An array of hashes of all transactions that were validated in this ledger.","type":"array","items":{"$ref":"id"}},"rawState":{"type":"string","description":"A JSON string containing all state data for this ledger in called JSON format."},"stateHashes":{"description":"An array of hashes of all state data in this ledger.","type":"array","items":{"$ref":"hash256"}}},"required":["stateHash","closeTime","closeTimeResolution","closeFlags","ledgerHash","ledgerVersion","parentLedgerHash","parentCloseTime","totalDrops","transactionHash"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getPaths","type":"array","items":{"type":"object","properties":{"source":{"$ref":"sourceAdjustment","description":"Properties of the source of the payment."},"destination":{"$ref":"destinationAdjustment","description":"Properties of the destination of the payment."},"paths":{"type":"string","description":"The paths of trustlines and orders to use in executing the payment."}},"required":["source","destination","paths"],"additionalProperties":true}}
 
 /***/ }),
 /* 199 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrderbook","type":"object","properties":{"bids":{"$ref":"orderbookOrders","description":"The buy orders in the order book."},"asks":{"$ref":"orderbookOrders","description":"The sell orders in the order book."}},"required":["bids","asks"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getServerInfo","type":"object","properties":{"buildVersion":{"type":"string","description":"The version number of the running called version."},"completeLedgers":{"type":"string","pattern":"[0-9,-]+","description":"Range expression indicating the sequence numbers of the ledger versions the local called has in its database. It is possible to be a disjoint sequence, e.g. “2500-5000,32570-7695432”."},"hostID":{"type":"string","description":"On an admin request, returns the hostname of the server running the called instance; otherwise, returns a unique four letter word."},"ioLatencyMs":{"type":"number","description":"Amount of time spent waiting for I/O operations to be performed, in milliseconds. If this number is not very, very low, then the called server is probably having serious load issues."},"load":{"type":"object","description":"*(Admin only)* Detailed information about the current load state of the server.","properties":{"jobTypes":{"type":"array","description":"*(Admin only)* Information about the rate of different types of jobs being performed by the server and how much time it spends on each.","items":{"type":"object"}},"threads":{"type":"number","description":"*(Admin only)* The number of threads in the server’s main job pool, performing various call Network operations."}},"required":["jobTypes","threads"]},"lastClose":{"type":"object","description":"Information about the last time the server closed a ledger.","properties":{"convergeTimeS":{"type":"number","description":"The time it took to reach a consensus for the last ledger closing, in seconds."},"proposers":{"type":"integer","minimum":0,"description":"Number of trusted validators participating in the ledger closing."}},"required":["convergeTimeS","proposers"]},"loadFactor":{"type":"number","description":"The load factor the server is currently enforcing, as a multiplier on the base transaction fee. The load factor is determined by the highest of the individual server’s load factor, cluster’s load factor, and the overall network’s load factor."},"peers":{"type":"integer","minimum":0,"description":"How many other called servers the node is currently connected to."},"pubkeyNode":{"type":"string","description":"Public key used to verify this node for internal communications; this key is automatically generated by the server the first time it starts up. (If deleted, the node can just create a new pair of keys.)"},"pubkeyValidator":{"type":"string","description":"*(Admin only)* Public key used by this node to sign ledger validations."},"serverState":{"type":"string","description":"A string indicating to what extent the server is participating in the network.","enum":["disconnected","connected","syncing","tracking","full","validating","proposing"]},"validatedLedger":{"type":"object","description":"Information about the fully-validated ledger with the highest sequence number (the most recent).","properties":{"age":{"type":"integer","minimum":0,"description":"The time since the ledger was closed, in seconds."},"baseFeeCALL":{"$ref":"value","description":"Base fee, in CALL. This may be represented in scientific notation such as 1e-05 for 0.00005."},"hash":{"$ref":"hash256","description":"Unique hash for the ledger, as an uppercase hexadecimal string."},"reserveBaseCALL":{"$ref":"value","description":"Minimum amount of CALL necessary for every account to keep in reserve."},"reserveIncrementCALL":{"$ref":"value","description":"Amount of CALL added to the account reserve for each object an account is responsible for in the ledger."},"ledgerVersion":{"type":"integer","minimum":0,"description":"Identifying sequence number of this ledger version."}},"additionalProperties":true,"required":["age","baseFeeCALL","hash","reserveBaseCALL","reserveIncrementCALL","ledgerVersion"]},"validationQuorum":{"type":"number","description":"Minimum number of trusted validations required in order to validate a ledger version. Some circumstances may cause the server to require more validations."}},"required":["buildVersion","completeLedgers","hostID","ioLatencyMs","lastClose","loadFactor","peers","pubkeyNode","serverState","validatedLedger","validationQuorum"],"additionalProperties":true}
 
 /***/ }),
 /* 200 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrders","type":"array","items":{"type":"object","properties":{"specification":{"$ref":"order","description":"An order specification that would create an order equivalent to the current state of this order."},"properties":{"description":"Properties of the order not in the specification.","type":"object","properties":{"maker":{"$ref":"address","description":"The address of the account that submitted the order."},"sequence":{"$ref":"sequence","description":"The account sequence number of the transaction that created this order."},"makerExchangeRate":{"$ref":"value","description":"The exchange rate from the point of view of the account that submitted the order (also known as \"quality\")."}},"required":["maker","sequence","makerExchangeRate"],"addtionalProperties":false}},"required":["specification","properties"],"additionalProperties":true}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getSettings","$ref":"settingsPlusMemos","not":{"required":["memos"]}}
 
 /***/ }),
 /* 201 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"orderChange","type":"object","description":"A change to an order.","properties":{"direction":{"type":"string","enum":["buy","sell"],"description":"Equal to \"buy\" for buy orders and \"sell\" for sell orders."},"quantity":{"$ref":"amount","description":"The amount to be bought or sold by the maker."},"totalPrice":{"$ref":"amount","description":"The total amount to be paid or received by the taker."},"makerExchangeRate":{"$ref":"value","description":"The exchange rate between the `quantity` currency and the `totalPrice` currency from the point of view of the maker."},"sequence":{"$ref":"sequence","description":"The order sequence number, used to identify the order for cancellation"},"status":{"enum":["created","filled","partially-filled","cancelled"],"description":"The status of the order. One of \"created\", \"filled\", \"partially-filled\", \"cancelled\"."},"expirationTime":{"type":"string","format":"date-time","description":"The time after which the order expires, if any."}},"required":["direction","quantity","totalPrice","sequence","status"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"orderbookOrders","type":"array","items":{"description":"An order in the order book.","type":"object","properties":{"specification":{"$ref":"order","description":"An order specification that would create an order equivalent to the current state of this order."},"properties":{"description":"Properties of the order not in the specification.","type":"object","properties":{"maker":{"$ref":"address","description":"The address of the account that submitted the order."},"sequence":{"$ref":"sequence","description":"The account sequence number of the transaction that created this order."},"makerExchangeRate":{"$ref":"value","description":"The exchange rate from the point of view of the account that submitted the order (also known as \"quality\")."}},"required":["maker","sequence","makerExchangeRate"],"addtionalProperties":false},"state":{"description":"The state of the order.","type":"object","properties":{"fundedAmount":{"$ref":"amount","description":"How much of the amount the maker would have to pay that the maker currently holds."},"priceOfFundedAmount":{"$ref":"amount","description":"How much the `fundedAmount` would convert to through the exchange rate of this order."}},"required":["fundedAmount","priceOfFundedAmount"],"additionalProperties":true}},"required":["specification","properties"],"additionalProperties":true}}
 
 /***/ }),
 /* 202 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getPaymentChannel","type":"object","properties":{"account":{"$ref":"address","description":"Address that created the payment channel."},"destination":{"$ref":"address","description":"Address to receive CALL claims against this channel."},"amount":{"$ref":"value","description":"The total amount of CALL funded in this channel."},"balance":{"$ref":"value","description":"The total amount of CALL delivered by this channel."},"settleDelay":{"type":"number","description":"Amount of seconds the source address must wait before closing the channel if it has unclaimed CALL."},"expiration":{"type":"string","format":"date-time","description":"Time when this channel expires."},"publicKey":{"$ref":"publicKey","description":"Public key of the key pair the source will use to sign claims against this channel."},"cancelAfter":{"type":"string","format":"date-time","description":"Time when this channel expires as specified at creation."},"sourceTag":{"$ref":"tag","description":"Source tag."},"destinationTag":{"$ref":"tag","description":"Destination tag."},"previousAffectingTransactionID":{"$ref":"hash256","description":"Hash value representing the most recent transaction that affected this payment channel."},"previousAffectingTransactionLedgerVersion":{"$ref":"ledgerVersion","description":"The ledger version that the transaction identified by the `previousAffectingTransactionID` was validated in."}},"required":["account","destination","amount","balance","settleDelay","previousAffectingTransactionID","previousAffectingTransactionLedgerVersion"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"outcome","type":"object","description":"The outcome of the transaction (what effects it had).","properties":{"result":{"type":"string","description":"Result code returned by called. "},"timestamp":{"type":"string","format":"date-time","description":"The timestamp when the transaction was validated. (May be missing when requesting transactions in binary mode.)"},"fee":{"$ref":"value","description":"The CALL fee that was charged for the transaction."},"deliveredAmount":{"$ref":"amount","description":"For payment transactions, it is impossible to reliably compute the actual delivered amount from the balanceChanges due to fixed precision. If the payment is not a partial payment and the transaction succeeded, the deliveredAmount should always be considered to be the amount specified in the transaction."},"balanceChanges":{"type":"object","additionalProperties":{"type":"array","description":"Key is the call address; value is an array of signed amounts representing changes of balances for that address.","items":{"$ref":"balance"}}},"orderbookChanges":{"type":"object","additionalProperties":{"type":"array","description":"Key is the maker's call address; value is an array of changes","items":{"$ref":"orderChange"}}},"ledgerVersion":{"$ref":"ledgerVersion","description":"The ledger version that the transaction was validated in."},"indexInLedger":{"type":"integer","minimum":0,"description":"The ordering index of the transaction in the ledger."}},"required":["result","fee","balanceChanges","orderbookChanges","ledgerVersion","indexInLedger"],"additionalProperties":true}
 
 /***/ }),
 /* 203 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepare","description":"Result of prepare function","type":"object","properties":{"txJSON":{"type":"string","description":"The prepared transaction in called JSON format."},"instructions":{"description":"The instructions for how to execute the transaction after adding automatic defaults.","type":"object","properties":{"fee":{"$ref":"value","description":"An exact fee to pay for the transaction. See [Transaction Fees](#transaction-fees) for more information."},"sequence":{"$ref":"sequence","description":"The initiating account's sequence number for this transaction."},"maxLedgerVersion":{"oneOf":[{"$ref":"ledgerVersion"},{"type":"null"}],"description":"The highest ledger version that the transaction can be included in. Set to `null` if there is no maximum."}},"additionalProperties":true,"required":["fee","sequence","maxLedgerVersion"]}},"additionalProperties":true,"required":["txJSON","instructions"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransaction","link":"gettransaction","properties":{"type":{"$ref":"transactionType"},"specification":{"description":"A specification that would produce the same outcome as this transaction. The structure of the specification depends on the value of the `type` field (see [Transaction Types](#transaction-types) for details). *Note:* This is **not** necessarily the same as the original specification."},"outcome":{"$ref":"outcome","description":"The outcome of the transaction (what effects it had)."},"id":{"$ref":"id","description":"A hash of the transaction that can be used to identify it."},"address":{"$ref":"address","description":"The address of the account that initiated the transaction."},"sequence":{"$ref":"sequence","description":"The account sequence number of the transaction for the account that initiated it."}},"required":["id","address","sequence","type","specification","outcome"],"additionalProperties":true,"oneOf":[{"properties":{"type":{"enum":["payment"]},"specification":{"$ref":"payment"}}},{"properties":{"type":{"enum":["order"]},"specification":{"$ref":"order"}}},{"properties":{"type":{"enum":["orderCancellation"]},"specification":{"$ref":"orderCancellation"}}},{"properties":{"type":{"enum":["trustline"]},"specification":{"$ref":"trustline"}}},{"properties":{"type":{"enum":["settings"]},"specification":{"$ref":"getSettings"}}},{"properties":{"type":{"enum":["escrowCreation"]},"specification":{"$ref":"escrowCreation"}}},{"properties":{"type":{"enum":["escrowCancellation"]},"specification":{"$ref":"escrowCancellation"}}},{"properties":{"type":{"enum":["escrowExecution"]},"specification":{"$ref":"escrowExecution"}}},{"properties":{"type":{"enum":["paymentChannelCreate"]},"specification":{"$ref":"paymentChannelCreate"}}},{"properties":{"type":{"enum":["paymentChannelFund"]},"specification":{"$ref":"paymentChannelFund"}}},{"properties":{"type":{"enum":["paymentChannelClaim"]},"specification":{"$ref":"paymentChannelClaim"}}}]}
 
 /***/ }),
 /* 204 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"ledgerEvent","description":"A ledger event message","type":"object","properties":{"baseFeeCALL":{"$ref":"value","description":"Base fee, in CALL."},"ledgerHash":{"$ref":"hash256","description":"Unique hash of the ledger that was closed, as hex."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Ledger version of the ledger that closed."},"ledgerTimestamp":{"type":"string","format":"date-time","description":"The time at which this ledger closed."},"reserveBaseCALL":{"$ref":"value","description":"The minimum reserve, in CALL, that is required for an account."},"reserveIncrementCALL":{"$ref":"value","description":"The increase in account reserve that is added for each item the account owns, such as offers or trust lines."},"transactionCount":{"type":"integer","minimum":0,"description":"Number of new transactions included in this ledger."},"validatedLedgerVersions":{"type":"string","description":"Range of ledgers that the server has available. This may be discontiguous."}},"addtionalProperties":false,"required":["baseFeeCALL","ledgerHash","ledgerTimestamp","reserveBaseCALL","reserveIncrementCALL","transactionCount","ledgerVersion","validatedLedgerVersions"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransactions","type":"array","items":{"$ref":"getTransaction"}}
 
 /***/ }),
 /* 205 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getPaths","type":"array","items":{"type":"object","properties":{"source":{"$ref":"sourceAdjustment","description":"Properties of the source of the payment."},"destination":{"$ref":"destinationAdjustment","description":"Properties of the destination of the payment."},"paths":{"type":"string","description":"The paths of trustlines and orders to use in executing the payment."}},"required":["source","destination","paths"],"additionalProperties":true}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTrustlines","type":"array","items":{"properties":{"specification":{"$ref":"trustline","description":"A trustline specification that would produce this trustline in its current state."},"counterparty":{"properties":{"limit":{"$ref":"value","description":"The maximum amount that the counterparty can be owed through the trustline."},"callingDisabled":{"type":"boolean","description":"If true, payments cannot call through this trustline."},"frozen":{"type":"boolean","description":"If true, the trustline is frozen, which means that funds can only be sent to the counterparty."},"authorized":{"type":"boolean","description":"If true, the counterparty authorizes this party to hold issuances from the counterparty."}},"description":"Properties of the trustline from the perspective of the counterparty.","required":["limit"],"additionalProperties":true},"state":{"properties":{"balance":{"$ref":"signedValue","description":"The balance on the trustline, representing which party owes the other and by how much."}},"description":"Properties of the trustline regarding it's current state that are not part of the specification.","required":["balance"],"additionalProperties":true}},"required":["specification","counterparty","state"],"additionalProperties":true}}
 
 /***/ }),
 /* 206 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getServerInfo","type":"object","properties":{"buildVersion":{"type":"string","description":"The version number of the running called version."},"completeLedgers":{"type":"string","pattern":"[0-9,-]+","description":"Range expression indicating the sequence numbers of the ledger versions the local called has in its database. It is possible to be a disjoint sequence, e.g. “2500-5000,32570-7695432”."},"hostID":{"type":"string","description":"On an admin request, returns the hostname of the server running the called instance; otherwise, returns a unique four letter word."},"ioLatencyMs":{"type":"number","description":"Amount of time spent waiting for I/O operations to be performed, in milliseconds. If this number is not very, very low, then the called server is probably having serious load issues."},"load":{"type":"object","description":"*(Admin only)* Detailed information about the current load state of the server.","properties":{"jobTypes":{"type":"array","description":"*(Admin only)* Information about the rate of different types of jobs being performed by the server and how much time it spends on each.","items":{"type":"object"}},"threads":{"type":"number","description":"*(Admin only)* The number of threads in the server’s main job pool, performing various call Network operations."}},"required":["jobTypes","threads"]},"lastClose":{"type":"object","description":"Information about the last time the server closed a ledger.","properties":{"convergeTimeS":{"type":"number","description":"The time it took to reach a consensus for the last ledger closing, in seconds."},"proposers":{"type":"integer","minimum":0,"description":"Number of trusted validators participating in the ledger closing."}},"required":["convergeTimeS","proposers"]},"loadFactor":{"type":"number","description":"The load factor the server is currently enforcing, as a multiplier on the base transaction fee. The load factor is determined by the highest of the individual server’s load factor, cluster’s load factor, and the overall network’s load factor."},"peers":{"type":"integer","minimum":0,"description":"How many other called servers the node is currently connected to."},"pubkeyNode":{"type":"string","description":"Public key used to verify this node for internal communications; this key is automatically generated by the server the first time it starts up. (If deleted, the node can just create a new pair of keys.)"},"pubkeyValidator":{"type":"string","description":"*(Admin only)* Public key used by this node to sign ledger validations."},"serverState":{"type":"string","description":"A string indicating to what extent the server is participating in the network.","enum":["disconnected","connected","syncing","tracking","full","validating","proposing"]},"validatedLedger":{"type":"object","description":"Information about the fully-validated ledger with the highest sequence number (the most recent).","properties":{"age":{"type":"integer","minimum":0,"description":"The time since the ledger was closed, in seconds."},"baseFeeCALL":{"$ref":"value","description":"Base fee, in CALL. This may be represented in scientific notation such as 1e-05 for 0.00005."},"hash":{"$ref":"hash256","description":"Unique hash for the ledger, as an uppercase hexadecimal string."},"reserveBaseCALL":{"$ref":"value","description":"Minimum amount of CALL necessary for every account to keep in reserve."},"reserveIncrementCALL":{"$ref":"value","description":"Amount of CALL added to the account reserve for each object an account is responsible for in the ledger."},"ledgerVersion":{"type":"integer","minimum":0,"description":"Identifying sequence number of this ledger version."}},"additionalProperties":true,"required":["age","baseFeeCALL","hash","reserveBaseCALL","reserveIncrementCALL","ledgerVersion"]},"validationQuorum":{"type":"number","description":"Minimum number of trusted validations required in order to validate a ledger version. Some circumstances may cause the server to require more validations."}},"required":["buildVersion","completeLedgers","hostID","ioLatencyMs","lastClose","loadFactor","peers","pubkeyNode","serverState","validatedLedger","validationQuorum"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalancesParameters","description":"Parameters for getBalances","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get balances for."},"options":{"description":"Options to filter and determine which balances to return.","properties":{"counterparty":{"$ref":"address","description":"Only return balances with this counterparty."},"currency":{"$ref":"currency","description":"Only return balances for this currency."},"limit":{"type":"integer","minimum":1,"description":"Return at most this many balances."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return balances as they were in this historical ledger version."}},"additionalProperties":true}},"additionalProperties":true,"required":["address"]}
 
 /***/ }),
 /* 207 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getSettings","$ref":"settingsPlusMemos","not":{"required":["memos"]}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalanceSheetParameters","description":"Parameters for getBalanceSheet","type":"object","properties":{"address":{"$ref":"address","description":"The Call address of the account to get the balance sheet of."},"options":{"properties":{"excludeAddresses":{"type":"array","items":{"$ref":"address"},"uniqueItems":true,"description":"Addresses to exclude from the balance totals."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Get the balance sheet as of this historical ledger version."}},"description":"Options to determine how the balances will be calculated.","additionalProperties":true}},"additionalProperties":true,"required":["address"]}
 
 /***/ }),
 /* 208 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"orderbookOrders","type":"array","items":{"description":"An order in the order book.","type":"object","properties":{"specification":{"$ref":"order","description":"An order specification that would create an order equivalent to the current state of this order."},"properties":{"description":"Properties of the order not in the specification.","type":"object","properties":{"maker":{"$ref":"address","description":"The address of the account that submitted the order."},"sequence":{"$ref":"sequence","description":"The account sequence number of the transaction that created this order."},"makerExchangeRate":{"$ref":"value","description":"The exchange rate from the point of view of the account that submitted the order (also known as \"quality\")."}},"required":["maker","sequence","makerExchangeRate"],"addtionalProperties":false},"state":{"description":"The state of the order.","type":"object","properties":{"fundedAmount":{"$ref":"amount","description":"How much of the amount the maker would have to pay that the maker currently holds."},"priceOfFundedAmount":{"$ref":"amount","description":"How much the `fundedAmount` would convert to through the exchange rate of this order."}},"required":["fundedAmount","priceOfFundedAmount"],"additionalProperties":true}},"required":["specification","properties"],"additionalProperties":true}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getLedgerParameters","description":"Parameters for getLedger","type":"object","properties":{"options":{"description":"Options affecting what ledger and how much data to return.","properties":{"ledgerVersion":{"$ref":"ledgerVersion","description":"Get ledger data for this historical ledger version."},"includeAllData":{"type":"boolean","description":"Include full transactions and/or state information if `includeTransactions` and/or `includeState` is set."},"includeTransactions":{"type":"boolean","description":"Return an array of hashes for each transaction or an array of all transactions that were validated in this ledger version, depending on whether `includeAllData` is set."},"includeState":{"type":"boolean","description":"Return an array of hashes for all state data or an array of all state data in this ledger version, depending on whether `includeAllData` is set."}},"additionalProperties":true}},"additionalProperties":true}
 
 /***/ }),
 /* 209 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"outcome","type":"object","description":"The outcome of the transaction (what effects it had).","properties":{"result":{"type":"string","description":"Result code returned by called. "},"timestamp":{"type":"string","format":"date-time","description":"The timestamp when the transaction was validated. (May be missing when requesting transactions in binary mode.)"},"fee":{"$ref":"value","description":"The CALL fee that was charged for the transaction."},"deliveredAmount":{"$ref":"amount","description":"For payment transactions, it is impossible to reliably compute the actual delivered amount from the balanceChanges due to fixed precision. If the payment is not a partial payment and the transaction succeeded, the deliveredAmount should always be considered to be the amount specified in the transaction."},"balanceChanges":{"type":"object","additionalProperties":{"type":"array","description":"Key is the call address; value is an array of signed amounts representing changes of balances for that address.","items":{"$ref":"balance"}}},"orderbookChanges":{"type":"object","additionalProperties":{"type":"array","description":"Key is the maker's call address; value is an array of changes","items":{"$ref":"orderChange"}}},"ledgerVersion":{"$ref":"ledgerVersion","description":"The ledger version that the transaction was validated in."},"indexInLedger":{"type":"integer","minimum":0,"description":"The ordering index of the transaction in the ledger."}},"required":["result","fee","balanceChanges","orderbookChanges","ledgerVersion","indexInLedger"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrdersParameters","description":"Parameters for getOrders","type":"object","properties":{"address":{"$ref":"address","description":"The Call address of the account to get open orders for."},"options":{"description":"Options that determine what orders will be returned.","properties":{"limit":{"type":"integer","minimum":1,"description":"At most this many orders will be returned."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return orders as of this historical ledger version."}},"additionalProperties":true}},"required":["address"],"additionalProperties":true}
 
 /***/ }),
 /* 210 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransaction","link":"gettransaction","properties":{"type":{"$ref":"transactionType"},"specification":{"description":"A specification that would produce the same outcome as this transaction. The structure of the specification depends on the value of the `type` field (see [Transaction Types](#transaction-types) for details). *Note:* This is **not** necessarily the same as the original specification."},"outcome":{"$ref":"outcome","description":"The outcome of the transaction (what effects it had)."},"id":{"$ref":"id","description":"A hash of the transaction that can be used to identify it."},"address":{"$ref":"address","description":"The address of the account that initiated the transaction."},"sequence":{"$ref":"sequence","description":"The account sequence number of the transaction for the account that initiated it."}},"required":["id","address","sequence","type","specification","outcome"],"additionalProperties":true,"oneOf":[{"properties":{"type":{"enum":["payment"]},"specification":{"$ref":"payment"}}},{"properties":{"type":{"enum":["order"]},"specification":{"$ref":"order"}}},{"properties":{"type":{"enum":["orderCancellation"]},"specification":{"$ref":"orderCancellation"}}},{"properties":{"type":{"enum":["trustline"]},"specification":{"$ref":"trustline"}}},{"properties":{"type":{"enum":["settings"]},"specification":{"$ref":"getSettings"}}},{"properties":{"type":{"enum":["escrowCreation"]},"specification":{"$ref":"escrowCreation"}}},{"properties":{"type":{"enum":["escrowCancellation"]},"specification":{"$ref":"escrowCancellation"}}},{"properties":{"type":{"enum":["escrowExecution"]},"specification":{"$ref":"escrowExecution"}}},{"properties":{"type":{"enum":["paymentChannelCreate"]},"specification":{"$ref":"paymentChannelCreate"}}},{"properties":{"type":{"enum":["paymentChannelFund"]},"specification":{"$ref":"paymentChannelFund"}}},{"properties":{"type":{"enum":["paymentChannelClaim"]},"specification":{"$ref":"paymentChannelClaim"}}}]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrderbookParameters","description":"Parameters for getOrderbook","type":"object","properties":{"address":{"$ref":"address","description":"Address of an account to use as point-of-view. (This affects which unfunded offers are returned.)"},"orderbook":{"$ref":"orderbook","description":"The order book to get."},"options":{"description":"Options to determine what to return.","properties":{"limit":{"type":"integer","minimum":1,"description":"Return at most this many orders from the order book."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return the order book as of this historical ledger version."}},"additionalProperties":true}},"required":["address","orderbook"],"additionalProperties":true}
 
 /***/ }),
 /* 211 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransactions","type":"array","items":{"$ref":"getTransaction"}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getPathsParameters","type":"object","properties":{"pathfind":{"description":"Specification of a pathfind request.","properties":{"source":{"description":"Properties of the source of funds.","type":"object","properties":{"address":{"$ref":"address","description":"The Call address of the account where funds will come from."},"amount":{"$ref":"laxAmount","description":"The amount of funds to send."},"currencies":{"description":"An array of currencies (with optional counterparty) that may be used in the payment paths.","type":"array","items":{"description":"A currency with optional counterparty.","type":"object","properties":{"currency":{"$ref":"currency"},"counterparty":{"$ref":"address","description":"The counterparty for the currency; if omitted any counterparty may be used."}},"required":["currency"],"additionalProperties":true},"uniqueItems":true}},"not":{"required":["amount","currencies"]},"additionalProperties":true,"required":["address"]},"destination":{"description":"Properties of the destination of funds.","type":"object","properties":{"address":{"$ref":"address","description":"The address to send to."},"amount":{"$ref":"laxLaxAmount","description":"The amount to be received by the receiver (`value` may be ommitted if a source amount is specified)."}},"required":["address","amount"],"additionalProperties":true}},"required":["source","destination"],"additionalProperties":true}},"additionalProperties":true,"required":["pathfind"]}
 
 /***/ }),
 /* 212 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTrustlines","type":"array","items":{"properties":{"specification":{"$ref":"trustline","description":"A trustline specification that would produce this trustline in its current state."},"counterparty":{"properties":{"limit":{"$ref":"value","description":"The maximum amount that the counterparty can be owed through the trustline."},"callingDisabled":{"type":"boolean","description":"If true, payments cannot call through this trustline."},"frozen":{"type":"boolean","description":"If true, the trustline is frozen, which means that funds can only be sent to the counterparty."},"authorized":{"type":"boolean","description":"If true, the counterparty authorizes this party to hold issuances from the counterparty."}},"description":"Properties of the trustline from the perspective of the counterparty.","required":["limit"],"additionalProperties":true},"state":{"properties":{"balance":{"$ref":"signedValue","description":"The balance on the trustline, representing which party owes the other and by how much."}},"description":"Properties of the trustline regarding it's current state that are not part of the specification.","required":["balance"],"additionalProperties":true}},"required":["specification","counterparty","state"],"additionalProperties":true}}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"api-options","type":"object","properties":{"trace":{"type":"boolean","description":"If true, log called requests and responses to stdout."},"feeCushion":{"type":"number","minimum":1,"description":"Factor to multiply estimated fee by to provide a cushion in case the required fee rises during submission of a transaction. Defaults to `1.2`."},"server":{"type":"string","description":"URI for called websocket port to connect to. Must start with `wss://` or `ws://`.","format":"uri","pattern":"^wss?://"},"proxy":{"format":"uri","description":"URI for HTTP/HTTPS proxy to use to connect to the called server."},"timeout":{"type":"integer","description":"Timeout in milliseconds before considering a request to have failed.","minimum":1},"proxyAuthorization":{"type":"string","description":"Username and password for HTTP basic authentication to the proxy in the format **username:password**."},"authorization":{"type":"string","description":"Username and password for HTTP basic authentication to the called server in the format **username:password**."},"trustedCertificates":{"type":"array","description":"Array of PEM-formatted SSL certificates to trust when connecting to a proxy. This is useful if you want to use a self-signed certificate on the proxy server. Note: Each element must contain a single certificate; concatenated certificates are not valid.","items":{"type":"string","description":"A PEM-formatted SSL certificate to trust when connecting to a proxy."}},"key":{"type":"string","description":"A string containing the private key of the client in PEM format. (Can be an array of keys)."},"passphrase":{"type":"string","description":"The passphrase for the private key of the client."},"certificate":{"type":"string","description":"A string containing the certificate key of the client in PEM format. (Can be an array of certificates)."}},"additionalProperties":true}
 
 /***/ }),
 /* 213 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"signPaymentChannelClaim","type":"string","$ref":"signature","additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getSettingsParameters","description":"Parameters for getSettings","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get the settings of."},"options":{"description":"Options that affect what to return.","properties":{"ledgerVersion":{"$ref":"ledgerVersion","description":"Get the settings as of this historical ledger version."}},"additionalProperties":true}},"required":["address"],"additionalProperties":true}
 
 /***/ }),
 /* 214 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"verifyPaymentChannelClaim","type":"boolean","additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getAccountInfoParameters","description":"Parameters for getAccountInfo","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get the account info of."},"options":{"description":"Options that affect what to return.","properties":{"ledgerVersion":{"$ref":"ledgerVersion","description":"Get the account info as of this historical ledger version."}},"additionalProperties":true}},"required":["address"],"additionalProperties":true}
 
 /***/ }),
 /* 215 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalancesParameters","description":"Parameters for getBalances","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get balances for."},"options":{"description":"Options to filter and determine which balances to return.","properties":{"counterparty":{"$ref":"address","description":"Only return balances with this counterparty."},"currency":{"$ref":"currency","description":"Only return balances for this currency."},"limit":{"type":"integer","minimum":1,"description":"Return at most this many balances."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return balances as they were in this historical ledger version."}},"additionalProperties":true}},"additionalProperties":true,"required":["address"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransactionParameters","description":"Parameters for getTransaction","type":"object","properties":{"id":{"$ref":"id"},"options":{"description":"Options to limit the ledger versions to search.","properties":{"minLedgerVersion":{"$ref":"ledgerVersion","description":"The lowest ledger version to search."},"maxLedgerVersion":{"$ref":"ledgerVersion","description":"The highest ledger version to search"}},"additionalProperties":true}},"additionalProperties":true,"required":["id"]}
 
 /***/ }),
 /* 216 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getBalanceSheetParameters","description":"Parameters for getBalanceSheet","type":"object","properties":{"address":{"$ref":"address","description":"The Call address of the account to get the balance sheet of."},"options":{"properties":{"excludeAddresses":{"type":"array","items":{"$ref":"address"},"uniqueItems":true,"description":"Addresses to exclude from the balance totals."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Get the balance sheet as of this historical ledger version."}},"description":"Options to determine how the balances will be calculated.","additionalProperties":true}},"additionalProperties":true,"required":["address"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransactionsParameters","description":"Parameters for getTransactions","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get transactions for."},"options":{"description":"Options to filter the resulting transactions.","properties":{"start":{"$ref":"hash256","description":"If specified, this transaction will be the first transaction in the result."},"limit":{"type":"integer","minimum":1,"description":"If specified, return at most this many transactions."},"minLedgerVersion":{"$ref":"ledgerVersion","description":"Return only transactions in this ledger verion or higher."},"maxLedgerVersion":{"$ref":"ledgerVersion","description":"Return only transactions in this ledger version or lower."},"earliestFirst":{"type":"boolean","description":"If true, sort transactions so that the earliest ones come first. By default, the newest transactions will come first."},"excludeFailures":{"type":"boolean","description":"If true, the result will omit transactions that did not succeed."},"initiated":{"type":"boolean","description":"If true, return only transactions initiated by the account specified by `address`. If false, return only transactions not initiated by the account specified by `address`."},"counterparty":{"$ref":"address","description":"If provided, only return transactions with this account as a counterparty to the transaction."},"types":{"type":"array","items":{"$ref":"transactionType"},"description":"Only return transactions of the specified [Transaction Types](#transaction-types)."},"binary":{"type":"boolean","description":"If true, the transactions will be sent from the server in a condensed binary format rather than JSON."}},"additionalProperties":true,"not":{"anyOf":[{"required":["start","minLedgerVersion"]},{"required":["start","maxLedgerVersion"]}]}}},"additionalProperties":true,"required":["address"]}
 
 /***/ }),
 /* 217 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getLedgerParameters","description":"Parameters for getLedger","type":"object","properties":{"options":{"description":"Options affecting what ledger and how much data to return.","properties":{"ledgerVersion":{"$ref":"ledgerVersion","description":"Get ledger data for this historical ledger version."},"includeAllData":{"type":"boolean","description":"Include full transactions and/or state information if `includeTransactions` and/or `includeState` is set."},"includeTransactions":{"type":"boolean","description":"Return an array of hashes for each transaction or an array of all transactions that were validated in this ledger version, depending on whether `includeAllData` is set."},"includeState":{"type":"boolean","description":"Return an array of hashes for all state data or an array of all state data in this ledger version, depending on whether `includeAllData` is set."}},"additionalProperties":true}},"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTrustlinesParameters","description":"Parameters for getTrustlines","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get trustlines for."},"options":{"description":"Options to filter and determine which trustlines to return.","properties":{"counterparty":{"$ref":"address","description":"Only return trustlines with this counterparty."},"currency":{"$ref":"currency","description":"Only return trustlines for this currency."},"limit":{"type":"integer","minimum":1,"description":"Return at most this many trustlines."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return trustlines as they were in this historical ledger version."}},"additionalProperties":true}},"additionalProperties":true,"required":["address"]}
 
 /***/ }),
 /* 218 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrdersParameters","description":"Parameters for getOrders","type":"object","properties":{"address":{"$ref":"address","description":"The Call address of the account to get open orders for."},"options":{"description":"Options that determine what orders will be returned.","properties":{"limit":{"type":"integer","minimum":1,"description":"At most this many orders will be returned."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return orders as of this historical ledger version."}},"additionalProperties":true}},"required":["address"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"preparePaymentParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"payment":{"$ref":"payment","description":"The specification of the payment to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","payment"]}
 
 /***/ }),
 /* 219 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getOrderbookParameters","description":"Parameters for getOrderbook","type":"object","properties":{"address":{"$ref":"address","description":"Address of an account to use as point-of-view. (This affects which unfunded offers are returned.)"},"orderbook":{"$ref":"orderbook","description":"The order book to get."},"options":{"description":"Options to determine what to return.","properties":{"limit":{"type":"integer","minimum":1,"description":"Return at most this many orders from the order book."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return the order book as of this historical ledger version."}},"additionalProperties":true}},"required":["address","orderbook"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareOrderParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"order":{"$ref":"order","description":"The specification of the order to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","order"]}
 
 /***/ }),
 /* 220 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getPathsParameters","type":"object","properties":{"pathfind":{"description":"Specification of a pathfind request.","properties":{"source":{"description":"Properties of the source of funds.","type":"object","properties":{"address":{"$ref":"address","description":"The Call address of the account where funds will come from."},"amount":{"$ref":"laxAmount","description":"The amount of funds to send."},"currencies":{"description":"An array of currencies (with optional counterparty) that may be used in the payment paths.","type":"array","items":{"description":"A currency with optional counterparty.","type":"object","properties":{"currency":{"$ref":"currency"},"counterparty":{"$ref":"address","description":"The counterparty for the currency; if omitted any counterparty may be used."}},"required":["currency"],"additionalProperties":true},"uniqueItems":true}},"not":{"required":["amount","currencies"]},"additionalProperties":true,"required":["address"]},"destination":{"description":"Properties of the destination of funds.","type":"object","properties":{"address":{"$ref":"address","description":"The address to send to."},"amount":{"$ref":"laxLaxAmount","description":"The amount to be received by the receiver (`value` may be ommitted if a source amount is specified)."}},"required":["address","amount"],"additionalProperties":true}},"required":["source","destination"],"additionalProperties":true}},"additionalProperties":true,"required":["pathfind"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareTrustlineParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"trustline":{"$ref":"trustline","description":"The specification of the trustline to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","trustline"]}
 
 /***/ }),
 /* 221 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getPaymentChannelParameters","description":"Parameters for getPaymentChannel","type":"object","properties":{"id":{"$ref":"hash256","description":"256-bit hexadecimal channel identifier."}},"additionalProperties":true,"required":["id"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareOrderCancellationParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"orderCancellation":{"$ref":"orderCancellation","description":"The specification of the order cancellation to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","orderCancellation"]}
 
 /***/ }),
 /* 222 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"api-options","type":"object","properties":{"trace":{"type":"boolean","description":"If true, log called requests and responses to stdout."},"feeCushion":{"type":"number","minimum":1,"description":"Factor to multiply estimated fee by to provide a cushion in case the required fee rises during submission of a transaction. Defaults to `1.2`."},"server":{"type":"string","description":"URI for called websocket port to connect to. Must start with `wss://` or `ws://`.","format":"uri","pattern":"^wss?://"},"proxy":{"format":"uri","description":"URI for HTTP/HTTPS proxy to use to connect to the called server."},"timeout":{"type":"integer","description":"Timeout in milliseconds before considering a request to have failed.","minimum":1},"proxyAuthorization":{"type":"string","description":"Username and password for HTTP basic authentication to the proxy in the format **username:password**."},"authorization":{"type":"string","description":"Username and password for HTTP basic authentication to the called server in the format **username:password**."},"trustedCertificates":{"type":"array","description":"Array of PEM-formatted SSL certificates to trust when connecting to a proxy. This is useful if you want to use a self-signed certificate on the proxy server. Note: Each element must contain a single certificate; concatenated certificates are not valid.","items":{"type":"string","description":"A PEM-formatted SSL certificate to trust when connecting to a proxy."}},"key":{"type":"string","description":"A string containing the private key of the client in PEM format. (Can be an array of keys)."},"passphrase":{"type":"string","description":"The passphrase for the private key of the client."},"certificate":{"type":"string","description":"A string containing the certificate key of the client in PEM format. (Can be an array of certificates)."}},"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareSettingsParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"settings":{"$ref":"settings","description":"The specification of the settings to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","settings"]}
 
 /***/ }),
 /* 223 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getSettingsParameters","description":"Parameters for getSettings","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get the settings of."},"options":{"description":"Options that affect what to return.","properties":{"ledgerVersion":{"$ref":"ledgerVersion","description":"Get the settings as of this historical ledger version."}},"additionalProperties":true}},"required":["address"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareIssueSetParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"issueset":{"$ref":"issueSet","description":"The specification of the issueSet to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","issueset"]}
 
 /***/ }),
 /* 224 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getAccountInfoParameters","description":"Parameters for getAccountInfo","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get the account info of."},"options":{"description":"Options that affect what to return.","properties":{"ledgerVersion":{"$ref":"ledgerVersion","description":"Get the account info as of this historical ledger version."}},"additionalProperties":true}},"required":["address"],"additionalProperties":true}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"computeLedgerHashParameters","type":"object","properties":{"ledger":{"$ref":"getLedger","description":"The ledger header to hash."}},"additionalProperties":true,"required":["ledger"]}
 
 /***/ }),
 /* 225 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransactionParameters","description":"Parameters for getTransaction","type":"object","properties":{"id":{"$ref":"id"},"options":{"description":"Options to limit the ledger versions to search.","properties":{"minLedgerVersion":{"$ref":"ledgerVersion","description":"The lowest ledger version to search."},"maxLedgerVersion":{"$ref":"ledgerVersion","description":"The highest ledger version to search"}},"additionalProperties":true}},"additionalProperties":true,"required":["id"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"signParameters","type":"object","properties":{"txJSON":{"type":"string","description":"Transaction represented as a JSON string in called format."},"secret":{"type":"string","format":"secret","description":"The secret of the account that is initiating the transaction."},"options":{"type":"object","description":"Options that control the type of signature that will be generated.","properties":{"signAs":{"$ref":"address","description":"The account that the signature should count for in multisigning."}},"additionalProperties":true}},"additionalProperties":true,"required":["txJSON","secret"]}
 
 /***/ }),
 /* 226 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTransactionsParameters","description":"Parameters for getTransactions","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get transactions for."},"options":{"description":"Options to filter the resulting transactions.","properties":{"start":{"$ref":"hash256","description":"If specified, this transaction will be the first transaction in the result."},"limit":{"type":"integer","minimum":1,"description":"If specified, return at most this many transactions."},"minLedgerVersion":{"$ref":"ledgerVersion","description":"Return only transactions in this ledger verion or higher."},"maxLedgerVersion":{"$ref":"ledgerVersion","description":"Return only transactions in this ledger version or lower."},"earliestFirst":{"type":"boolean","description":"If true, sort transactions so that the earliest ones come first. By default, the newest transactions will come first."},"excludeFailures":{"type":"boolean","description":"If true, the result will omit transactions that did not succeed."},"initiated":{"type":"boolean","description":"If true, return only transactions initiated by the account specified by `address`. If false, return only transactions not initiated by the account specified by `address`."},"counterparty":{"$ref":"address","description":"If provided, only return transactions with this account as a counterparty to the transaction."},"types":{"type":"array","items":{"$ref":"transactionType"},"description":"Only return transactions of the specified [Transaction Types](#transaction-types)."},"binary":{"type":"boolean","description":"If true, the transactions will be sent from the server in a condensed binary format rather than JSON."}},"additionalProperties":true,"not":{"anyOf":[{"required":["start","minLedgerVersion"]},{"required":["start","maxLedgerVersion"]}]}}},"additionalProperties":true,"required":["address"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"submitParameters","type":"object","properties":{"signedTransaction":{"$ref":"blob","description":"A signed transaction as returned by [sign](#sign)."}},"additionalProperties":true,"required":["signedTransaction"]}
 
 /***/ }),
 /* 227 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"getTrustlinesParameters","description":"Parameters for getTrustlines","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account to get trustlines for."},"options":{"description":"Options to filter and determine which trustlines to return.","properties":{"counterparty":{"$ref":"address","description":"Only return trustlines with this counterparty."},"currency":{"$ref":"currency","description":"Only return trustlines for this currency."},"limit":{"type":"integer","minimum":1,"description":"Return at most this many trustlines."},"ledgerVersion":{"$ref":"ledgerVersion","description":"Return trustlines as they were in this historical ledger version."}},"additionalProperties":true}},"additionalProperties":true,"required":["address"]}
+module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"generateAddressParameters","type":"object","properties":{"options":{"type":"object","description":"Options to control how the address and secret are generated.","properties":{"entropy":{"type":"array","items":{"type":"integer","minimum":0,"maximum":255},"description":"The entropy to use to generate the seed."},"algorithm":{"type":"string","enum":["ecdsa-secp256k1","ed25519"],"description":"The digital signature algorithm to generate an address for. Can be `ecdsa-secp256k1` (default) or `ed25519`."}},"additionalProperties":true}},"additionalProperties":true}
 
 /***/ }),
 /* 228 */
 /***/ (function(module, exports) {
 
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"preparePaymentParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"payment":{"$ref":"payment","description":"The specification of the payment to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","payment"]}
-
-/***/ }),
-/* 229 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareOrderParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"order":{"$ref":"order","description":"The specification of the order to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","order"]}
-
-/***/ }),
-/* 230 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareTrustlineParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"trustline":{"$ref":"trustline","description":"The specification of the trustline to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","trustline"]}
-
-/***/ }),
-/* 231 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareOrderCancellationParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"orderCancellation":{"$ref":"orderCancellation","description":"The specification of the order cancellation to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","orderCancellation"]}
-
-/***/ }),
-/* 232 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareSettingsParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"settings":{"$ref":"settings","description":"The specification of the settings to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","settings"]}
-
-/***/ }),
-/* 233 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareIssueSetParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"issueset":{"$ref":"issueSet","description":"The specification of the issueSet to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","issueset"]}
-
-/***/ }),
-/* 234 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareEscrowCreationParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"escrowCreation":{"$ref":"escrowCreation","description":"The specification of the escrow creation to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","escrowCreation"]}
-
-/***/ }),
-/* 235 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareEscrowCancellationParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"escrowCancellation":{"$ref":"escrowCancellation","description":"The specification of the escrow cancellation to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","escrowCancellation"]}
-
-/***/ }),
-/* 236 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"prepareEscrowExecutionParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"escrowExecution":{"$ref":"escrowExecution","description":"The specification of the escrow execution to prepare."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","escrowExecution"]}
-
-/***/ }),
-/* 237 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"preparePaymentChannelCreateParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"paymentChannelCreate":{"$ref":"paymentChannelCreate","description":"The specification of the payment channel to create."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","paymentChannelCreate"]}
-
-/***/ }),
-/* 238 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"preparePaymentChannelFundParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"paymentChannelFund":{"$ref":"paymentChannelFund","description":"The channel to fund, and the details of how to fund it."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","paymentChannelFund"]}
-
-/***/ }),
-/* 239 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"preparePaymentChannelClaimParameters","type":"object","properties":{"address":{"$ref":"address","description":"The address of the account that is creating the transaction."},"paymentChannelClaim":{"$ref":"paymentChannelClaim","description":"Details of the channel and claim."},"instructions":{"$ref":"instructions"}},"additionalProperties":true,"required":["address","paymentChannelClaim"]}
-
-/***/ }),
-/* 240 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"computeLedgerHashParameters","type":"object","properties":{"ledger":{"$ref":"getLedger","description":"The ledger header to hash."}},"additionalProperties":true,"required":["ledger"]}
-
-/***/ }),
-/* 241 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"signParameters","type":"object","properties":{"txJSON":{"type":"string","description":"Transaction represented as a JSON string in called format."},"secret":{"type":"string","format":"secret","description":"The secret of the account that is initiating the transaction."},"options":{"type":"object","description":"Options that control the type of signature that will be generated.","properties":{"signAs":{"$ref":"address","description":"The account that the signature should count for in multisigning."}},"additionalProperties":true}},"additionalProperties":true,"required":["txJSON","secret"]}
-
-/***/ }),
-/* 242 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"submitParameters","type":"object","properties":{"signedTransaction":{"$ref":"blob","description":"A signed transaction as returned by [sign](#sign)."}},"additionalProperties":true,"required":["signedTransaction"]}
-
-/***/ }),
-/* 243 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"generateAddressParameters","type":"object","properties":{"options":{"type":"object","description":"Options to control how the address and secret are generated.","properties":{"entropy":{"type":"array","items":{"type":"integer","minimum":0,"maximum":255},"description":"The entropy to use to generate the seed."},"algorithm":{"type":"string","enum":["ecdsa-secp256k1","ed25519"],"description":"The digital signature algorithm to generate an address for. Can be `ecdsa-secp256k1` (default) or `ed25519`."}},"additionalProperties":true}},"additionalProperties":true}
-
-/***/ }),
-/* 244 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"signPaymentChannelClaimParameters","type":"object","properties":{"channel":{"$ref":"hash256","description":"256-bit hexadecimal channel identifier."},"amount":{"$ref":"value","description":"Amount of CALL authorized by the claim."},"privateKey":{"$ref":"publicKey","description":"The private key to sign the payment channel claim."}},"additionalProperties":true,"required":["channel","amount","privateKey"]}
-
-/***/ }),
-/* 245 */
-/***/ (function(module, exports) {
-
-module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"verifyPaymentChannelClaimParameters","type":"object","properties":{"channel":{"$ref":"hash256","description":"256-bit hexadecimal channel identifier."},"amount":{"$ref":"value","description":"Amount of CALL authorized by the claim."},"signature":{"$ref":"signature","description":"Signature of this claim."},"publicKey":{"$ref":"publicKey","description":"Public key of the channel's sender"}},"additionalProperties":true,"required":["channel","amount","signature","publicKey"]}
-
-/***/ }),
-/* 246 */
-/***/ (function(module, exports) {
-
 module.exports = {"$schema":"http://json-schema.org/draft-04/schema#","title":"combineParameters","type":"object","properties":{"signedTransactions":{"type":"array","description":"An array of signed transactions (from the output of [sign](#sign)) to combine.","items":{"type":"string","pattern":"^[A-F0-9]+$","description":"A single-signed transaction represented as an uppercase hexadecimal string (from the output of [sign](#sign))"},"minLength":1}},"additionalProperties":true,"required":["signedTransactions"]}
 
 /***/ }),
-/* 247 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37605,7 +37443,7 @@ exports.getFee = getFee;
 
 
 /***/ }),
-/* 248 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37622,9 +37460,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var events_1 = __webpack_require__(17);
+var events_1 = __webpack_require__(14);
 var url_1 = __webpack_require__(29);
-var WebSocket = __webpack_require__(251);
+var WebSocket = __webpack_require__(233);
 var rangeset_1 = __webpack_require__(70);
 var errors_1 = __webpack_require__(36);
 function isStreamMessageType(type) {
@@ -37867,7 +37705,7 @@ var Connection = /** @class */ (function (_super) {
             var proxyOptions = _.assign({}, parsedProxyURL, proxyOverrides);
             var HttpsProxyAgent = void 0;
             try {
-                HttpsProxyAgent = __webpack_require__(252);
+                HttpsProxyAgent = __webpack_require__(234);
             }
             catch (error) {
                 throw new Error('"proxy" option is not supported in the browser');
@@ -38068,7 +37906,7 @@ exports.default = Connection;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 249 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38227,7 +38065,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 250 */
+/* 232 */
 /***/ (function(module, exports) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
@@ -38317,7 +38155,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 251 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38332,7 +38170,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var events_1 = __webpack_require__(17);
+var events_1 = __webpack_require__(14);
 /**
  * Provides `EventEmitter` interface for native browser `WebSocket`,
  * same, as `ws` package provides.
@@ -38382,7 +38220,7 @@ module.exports = WSWrapper;
 
 
 /***/ }),
-/* 252 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38390,7 +38228,7 @@ module.exports = WSWrapper;
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const agent_1 = __importDefault(__webpack_require__(253));
+const agent_1 = __importDefault(__webpack_require__(235));
 function createHttpsProxyAgent(opts) {
     return new agent_1.default(opts);
 }
@@ -38402,7 +38240,7 @@ module.exports = createHttpsProxyAgent;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
-/* 253 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38423,10 +38261,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const net_1 = __importDefault(__webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"net\""); e.code = 'MODULE_NOT_FOUND'; throw e; }())));
 const tls_1 = __importDefault(__webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"tls\""); e.code = 'MODULE_NOT_FOUND'; throw e; }())));
 const url_1 = __importDefault(__webpack_require__(29));
-const assert_1 = __importDefault(__webpack_require__(2));
+const assert_1 = __importDefault(__webpack_require__(3));
 const debug_1 = __importDefault(__webpack_require__(49));
-const agent_base_1 = __webpack_require__(256);
-const parse_proxy_response_1 = __importDefault(__webpack_require__(258));
+const agent_base_1 = __webpack_require__(238);
+const parse_proxy_response_1 = __importDefault(__webpack_require__(240));
 const debug = debug_1.default('https-proxy-agent:agent');
 /**
  * The `HttpsProxyAgent` implements an HTTP Agent subclass that connects to
@@ -38589,7 +38427,7 @@ function omit(obj, ...keys) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 254 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -38605,7 +38443,7 @@ function setup(env) {
 	createDebug.disable = disable;
 	createDebug.enable = enable;
 	createDebug.enabled = enabled;
-	createDebug.humanize = __webpack_require__(255);
+	createDebug.humanize = __webpack_require__(237);
 
 	Object.keys(env).forEach(key => {
 		createDebug[key] = env[key];
@@ -38861,7 +38699,7 @@ module.exports = setup;
 
 
 /***/ }),
-/* 255 */
+/* 237 */
 /***/ (function(module, exports) {
 
 /**
@@ -39029,7 +38867,7 @@ function plural(ms, msAbs, n, name) {
 
 
 /***/ }),
-/* 256 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39037,9 +38875,9 @@ function plural(ms, msAbs, n, name) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const events_1 = __webpack_require__(17);
+const events_1 = __webpack_require__(14);
 const debug_1 = __importDefault(__webpack_require__(49));
-const promisify_1 = __importDefault(__webpack_require__(257));
+const promisify_1 = __importDefault(__webpack_require__(239));
 const debug = debug_1.default('agent-base');
 function isAgent(v) {
     return Boolean(v) && typeof v.addRequest === 'function';
@@ -39236,7 +39074,7 @@ module.exports = createAgent;
 //# sourceMappingURL=index.js.map
 
 /***/ }),
-/* 257 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39260,7 +39098,7 @@ exports.default = promisify;
 //# sourceMappingURL=promisify.js.map
 
 /***/ }),
-/* 258 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39333,7 +39171,7 @@ exports.default = parseProxyResponse;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 259 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39382,7 +39220,7 @@ exports.formatLedgerClose = formatLedgerClose;
 
 
 /***/ }),
-/* 260 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39393,12 +39231,12 @@ module.exports.parseBalanceChanges =
 module.exports.parseFinalBalances =
   __webpack_require__(72).parseFinalBalances
 module.exports.parseOrderbookChanges =
-  __webpack_require__(261).parseOrderbookChanges
+  __webpack_require__(243).parseOrderbookChanges
 module.exports.getAffectedAccounts = __webpack_require__(39).getAffectedAccounts
 
 
 /***/ }),
-/* 261 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39407,7 +39245,7 @@ var _ = __webpack_require__(0)
 var utils = __webpack_require__(39)
 var GlobalBigNumber = __webpack_require__(6)
 var BigNumber = GlobalBigNumber.another({DECIMAL_PLACES: 40})
-var parseQuality = __webpack_require__(262)
+var parseQuality = __webpack_require__(244)
 
 var lsfSell = 0x00020000  
 
@@ -39550,12 +39388,12 @@ exports.parseOrderbookChanges = function parseOrderbookChanges(metadata) {
 
 
 /***/ }),
-/* 262 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var assert = __webpack_require__(2)
+var assert = __webpack_require__(3)
 var BigNumber = __webpack_require__(6)
 
 /*
@@ -39583,17 +39421,17 @@ module.exports = parseQuality
 
 
 /***/ }),
-/* 263 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
-var utils = __webpack_require__(9);
+var assert = __webpack_require__(3);
+var utils = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
-var amount_1 = __webpack_require__(16);
+var amount_1 = __webpack_require__(23);
 function isNoDirectCall(tx) {
     return (tx.Flags & common_1.txFlags.Payment.NoCallDirect) !== 0;
 }
@@ -39631,14 +39469,14 @@ exports.default = parsePayment;
 
 
 /***/ }),
-/* 264 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
+var assert = __webpack_require__(3);
+var utils_1 = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
 var flags = common_1.txFlags.TrustSet;
 function parseFlag(flagsValue, trueValue, falseValue) {
@@ -39667,42 +39505,41 @@ exports.default = parseTrustline;
 
 
 /***/ }),
-/* 265 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-//import {parseQuality} from './utils'
-//import {txFlags, removeUndefined} from '../../common'
-//const flags = txFlags.TrustSet
-// function parseFlag(flagsValue, trueValue, falseValue) {
-//   if (flagsValue & trueValue) {
-//     return true
-//   }
-//   if (flagsValue & falseValue) {
-//     return false
-//   }
-//   return undefined
-// }
+var assert = __webpack_require__(3);
+var common_1 = __webpack_require__(1);
+var flags = common_1.txFlags.IssueSet;
+function parseFlag(flagsValue, value) {
+    return ((flagsValue & value) !== 0);
+}
 function parseIssueSet(tx) {
     assert(tx.TransactionType === 'IssueSet');
-    return tx;
+    return common_1.removeUndefined({
+        currency: tx.Total.currency,
+        issuer: tx.Total.issuer,
+        total: tx.Total.value,
+        additional: parseFlag(tx.Flags, flags.Additional),
+        invoice: parseFlag(tx.Flags, flags.NonFungible)
+    });
 }
 exports.default = parseIssueSet;
 
 
 /***/ }),
-/* 266 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
-var amount_1 = __webpack_require__(16);
+var assert = __webpack_require__(3);
+var utils_1 = __webpack_require__(19);
+var amount_1 = __webpack_require__(23);
 var common_1 = __webpack_require__(1);
 var flags = common_1.txFlags.OfferCreate;
 function parseOrder(tx) {
@@ -39727,13 +39564,13 @@ exports.default = parseOrder;
 
 
 /***/ }),
-/* 267 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 function parseOrderCancellation(tx) {
     assert(tx.TransactionType === 'OfferCancel');
     return {
@@ -39744,14 +39581,14 @@ exports.default = parseOrderCancellation;
 
 
 /***/ }),
-/* 268 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var common_1 = __webpack_require__(1);
 var AccountFlags = common_1.constants.AccountFlags;
 var fields_1 = __webpack_require__(73);
@@ -39806,152 +39643,7 @@ exports.default = parseSettings;
 
 
 /***/ }),
-/* 269 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var amount_1 = __webpack_require__(16);
-var utils_1 = __webpack_require__(9);
-var common_1 = __webpack_require__(1);
-function parseEscrowCreation(tx) {
-    assert(tx.TransactionType === 'EscrowCreate');
-    return common_1.removeUndefined({
-        amount: amount_1.default(tx.Amount).value,
-        destination: tx.Destination,
-        memos: utils_1.parseMemos(tx),
-        condition: tx.Condition,
-        allowCancelAfter: utils_1.parseTimestamp(tx.CancelAfter),
-        allowExecuteAfter: utils_1.parseTimestamp(tx.FinishAfter),
-        sourceTag: tx.SourceTag,
-        destinationTag: tx.DestinationTag
-    });
-}
-exports.default = parseEscrowCreation;
-
-
-/***/ }),
-/* 270 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
-var common_1 = __webpack_require__(1);
-function parseEscrowExecution(tx) {
-    assert(tx.TransactionType === 'EscrowFinish');
-    return common_1.removeUndefined({
-        memos: utils_1.parseMemos(tx),
-        owner: tx.Owner,
-        escrowSequence: tx.OfferSequence,
-        condition: tx.Condition,
-        fulfillment: tx.Fulfillment
-    });
-}
-exports.default = parseEscrowExecution;
-
-
-/***/ }),
-/* 271 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
-var common_1 = __webpack_require__(1);
-function parseEscrowCancellation(tx) {
-    assert(tx.TransactionType === 'EscrowCancel');
-    return common_1.removeUndefined({
-        memos: utils_1.parseMemos(tx),
-        owner: tx.Owner,
-        escrowSequence: tx.OfferSequence
-    });
-}
-exports.default = parseEscrowCancellation;
-
-
-/***/ }),
-/* 272 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
-var common_1 = __webpack_require__(1);
-var amount_1 = __webpack_require__(16);
-function parsePaymentChannelCreate(tx) {
-    assert(tx.TransactionType === 'PaymentChannelCreate');
-    return common_1.removeUndefined({
-        amount: amount_1.default(tx.Amount).value,
-        destination: tx.Destination,
-        settleDelay: tx.SettleDelay,
-        publicKey: tx.PublicKey,
-        cancelAfter: tx.CancelAfter && utils_1.parseTimestamp(tx.CancelAfter),
-        sourceTag: tx.SourceTag,
-        destinationTag: tx.DestinationTag
-    });
-}
-exports.default = parsePaymentChannelCreate;
-
-
-/***/ }),
-/* 273 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var utils_1 = __webpack_require__(9);
-var common_1 = __webpack_require__(1);
-var amount_1 = __webpack_require__(16);
-function parsePaymentChannelFund(tx) {
-    assert(tx.TransactionType === 'PaymentChannelFund');
-    return common_1.removeUndefined({
-        channel: tx.Channel,
-        amount: amount_1.default(tx.Amount).value,
-        expiration: tx.Expiration && utils_1.parseTimestamp(tx.Expiration)
-    });
-}
-exports.default = parsePaymentChannelFund;
-
-
-/***/ }),
-/* 274 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var assert = __webpack_require__(2);
-var common_1 = __webpack_require__(1);
-var amount_1 = __webpack_require__(16);
-var claimFlags = common_1.txFlags.PaymentChannelClaim;
-function parsePaymentChannelClaim(tx) {
-    assert(tx.TransactionType === 'PaymentChannelClaim');
-    return common_1.removeUndefined({
-        channel: tx.Channel,
-        balance: tx.Balance && amount_1.default(tx.Balance).value,
-        amount: tx.Amount && amount_1.default(tx.Amount).value,
-        signature: tx.Signature,
-        publicKey: tx.PublicKey,
-        renew: Boolean(tx.Flags & claimFlags.Renew) || undefined,
-        close: Boolean(tx.Flags & claimFlags.Close) || undefined
-    });
-}
-exports.default = parsePaymentChannelClaim;
-
-
-/***/ }),
-/* 275 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39972,7 +39664,7 @@ exports.default = parseFeeUpdate;
 
 
 /***/ }),
-/* 276 */
+/* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39987,7 +39679,7 @@ exports.default = parseAmendment;
 
 
 /***/ }),
-/* 277 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39996,7 +39688,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var binary = __webpack_require__(40);
 var computeTransactionHash = __webpack_require__(44).computeTransactionHash;
-var utils = __webpack_require__(18);
+var utils = __webpack_require__(15);
 var transaction_1 = __webpack_require__(50);
 var transaction_2 = __webpack_require__(71);
 var common_1 = __webpack_require__(1);
@@ -40102,15 +39794,17 @@ function getAccountTx(connection, address, options, marker, limit) {
 // ) {
 //   const compare = options.earliestFirst ? utils.compareTransactions :
 //     _.rearg(utils.compareTransactions, 1, 0)
-//   const sortedTransactions = transactions.sort(compare)
+//   // const sortedTransactions = transactions.sort(compare)
+//   const sortedTransactions = transactions
 //   return checkForLedgerGaps(connection, options, sortedTransactions).then(
 //     () => sortedTransactions)
 // }
 function getTransactionsInternal(connection, address, options) {
     var getter = _.partial(getAccountTx, connection, address, options);
-    //const format = _.partial(formatResponse, connection, options)
-    // return utils.getRecursive(getter, options.limit).then(format)
-    return utils.getRecursive(getter, options.limit, options.counterparty);
+    // const format = _.partial(formatResponse, connection, options)
+    // return utils.getRecursive(getter, options.limit).then(format);
+    // TODO format used or not
+    return utils.getRecursive(getter, options.limit, options.marker);
 }
 function getTransactions(address, options) {
     var _this = this;
@@ -40133,20 +39827,20 @@ exports.default = getTransactions;
 
 
 /***/ }),
-/* 278 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var _ = __webpack_require__(0);
 var enums = __webpack_require__(24);var
 Field = enums.Field;
-var types = __webpack_require__(21);
+var types = __webpack_require__(20);
 var binary = __webpack_require__(56);var _require =
 __webpack_require__(93),ShaMap = _require.ShaMap;
-var ledgerHashes = __webpack_require__(318);
+var ledgerHashes = __webpack_require__(294);
 var hashes = __webpack_require__(42);
-var quality = __webpack_require__(319);
-var signing = __webpack_require__(320);var _require2 =
+var quality = __webpack_require__(295);
+var signing = __webpack_require__(296);var _require2 =
 __webpack_require__(33),HashPrefix = _require2.HashPrefix;
 
 
@@ -40163,22 +39857,22 @@ module.exports = _.assign({
 types);
 
 /***/ }),
-/* 279 */
+/* 255 */
 /***/ (function(module, exports) {
 
 module.exports = {"TYPES":{"Validation":10003,"Done":-1,"Hash128":4,"Blob":7,"AccountID":8,"Amount":6,"Hash256":5,"UInt8":16,"Vector256":19,"STObject":14,"Unknown":-2,"Transaction":10001,"Hash160":17,"PathSet":18,"LedgerEntry":10002,"UInt16":1,"NotPresent":0,"UInt64":3,"UInt32":2,"STArray":15},"LEDGER_ENTRY_TYPES":{"Any":-3,"Child":-2,"Invalid":-1,"AccountRoot":97,"DirectoryNode":100,"CallState":114,"Ticket":84,"SignerList":83,"Offer":111,"LedgerHashes":104,"Amendments":102,"FeeSettings":115,"Escrow":117,"PayChannel":120,"DepositPreauth":112,"Check":67,"NickName":110,"Contract":99,"GeneratorMap":103,"IssueRoot":105,"FeeRoot":70,"InvoiceRoot":118},"FIELDS":[["Generic",{"nth":0,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Unknown"}],["Invalid",{"nth":-1,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Unknown"}],["LedgerEntryType",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt16"}],["TransactionType",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt16"}],["SignerWeight",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt16"}],["Flags",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SourceTag",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["Sequence",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["PreviousTxnLgrSeq",{"nth":5,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["LedgerSequence",{"nth":6,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["CloseTime",{"nth":7,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["ParentCloseTime",{"nth":8,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SigningTime",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["Expiration",{"nth":10,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["TransferRate",{"nth":11,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["WalletSize",{"nth":12,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["OwnerCount",{"nth":13,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["DestinationTag",{"nth":14,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["HighQualityIn",{"nth":16,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["HighQualityOut",{"nth":17,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["LowQualityIn",{"nth":18,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["LowQualityOut",{"nth":19,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["QualityIn",{"nth":20,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["QualityOut",{"nth":21,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["StampEscrow",{"nth":22,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["BondAmount",{"nth":23,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["LoadFee",{"nth":24,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["OfferSequence",{"nth":25,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["FirstLedgerSequence",{"nth":26,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["LastLedgerSequence",{"nth":27,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["TransactionIndex",{"nth":28,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["OperationLimit",{"nth":29,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["ReferenceFeeUnits",{"nth":30,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["ReserveBase",{"nth":31,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["ReserveIncrement",{"nth":32,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SetFlag",{"nth":33,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["ClearFlag",{"nth":34,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SignerQuorum",{"nth":35,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["CancelAfter",{"nth":36,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["FinishAfter",{"nth":37,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SignerListID",{"nth":38,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SettleDelay",{"nth":39,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["IndexNext",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["IndexPrevious",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["BookNode",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["OwnerNode",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["BaseFee",{"nth":5,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["ExchangeRate",{"nth":6,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["LowNode",{"nth":7,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["HighNode",{"nth":8,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["DestinationNode",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["Fans",{"nth":10,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}],["EmailHash",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash128"}],["LedgerHash",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["ParentHash",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["TransactionHash",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["AccountHash",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["PreviousTxnID",{"nth":5,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["LedgerIndex",{"nth":6,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["WalletLocator",{"nth":7,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["RootIndex",{"nth":8,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["AccountTxnID",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["BookDirectory",{"nth":16,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["InvoiceID",{"nth":17,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["Nickname",{"nth":18,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["Amendment",{"nth":19,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["TicketID",{"nth":20,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["Digest",{"nth":21,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["hash",{"nth":257,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Hash256"}],["index",{"nth":258,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Hash256"}],["Amount",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["Balance",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["LimitAmount",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["TakerPays",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["TakerGets",{"nth":5,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["LowLimit",{"nth":6,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["HighLimit",{"nth":7,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["Fee",{"nth":8,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["SendMax",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["DeliverMin",{"nth":10,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["Total",{"nth":11,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["Issued",{"nth":12,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["Freezed",{"nth":12,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["MinimumOffer",{"nth":16,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["CallEscrow",{"nth":17,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["DeliveredAmount",{"nth":18,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Amount"}],["taker_gets_funded",{"nth":258,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Amount"}],["taker_pays_funded",{"nth":259,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Amount"}],["PublicKey",{"nth":1,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["MessageKey",{"nth":2,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["SigningPubKey",{"nth":3,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["TxnSignature",{"nth":4,"isVLEncoded":true,"isSerialized":true,"isSigningField":false,"type":"Blob"}],["Generator",{"nth":5,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["Signature",{"nth":6,"isVLEncoded":true,"isSerialized":true,"isSigningField":false,"type":"Blob"}],["Domain",{"nth":7,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["FundCode",{"nth":8,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["RemoveCode",{"nth":9,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["ExpireCode",{"nth":10,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["CreateCode",{"nth":11,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["MemoType",{"nth":12,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["MemoData",{"nth":13,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["MemoFormat",{"nth":14,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["Fulfillment",{"nth":16,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["Condition",{"nth":17,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["MasterSignature",{"nth":18,"isVLEncoded":true,"isSerialized":true,"isSigningField":false,"type":"Blob"}],["NickName",{"nth":19,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["Invoice",{"nth":20,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Blob"}],["Account",{"nth":1,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["Owner",{"nth":2,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["Destination",{"nth":3,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["Issuer",{"nth":4,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["Authorize",{"nth":5,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["Unauthorize",{"nth":6,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["Target",{"nth":7,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["RegularKey",{"nth":8,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"AccountID"}],["ObjectEndMarker",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["TransactionMetaData",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["CreatedNode",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["DeletedNode",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["ModifiedNode",{"nth":5,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["PreviousFields",{"nth":6,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["FinalFields",{"nth":7,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["NewFields",{"nth":8,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["TemplateEntry",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["Memo",{"nth":10,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["SignerEntry",{"nth":11,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["Signer",{"nth":16,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["Majority",{"nth":18,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STObject"}],["ArrayEndMarker",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["Signers",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":false,"type":"STArray"}],["SignerEntries",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["Template",{"nth":5,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["Necessary",{"nth":6,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["Sufficient",{"nth":7,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["AffectedNodes",{"nth":8,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["Memos",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["Majorities",{"nth":16,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"STArray"}],["CloseResolution",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt8"}],["Method",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt8"}],["TransactionResult",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt8"}],["TakerPaysCurrency",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash160"}],["TakerPaysIssuer",{"nth":2,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash160"}],["TakerGetsCurrency",{"nth":3,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash160"}],["TakerGetsIssuer",{"nth":4,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash160"}],["Paths",{"nth":1,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"PathSet"}],["Indexes",{"nth":1,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Vector256"}],["Hashes",{"nth":2,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Vector256"}],["Amendments",{"nth":3,"isVLEncoded":true,"isSerialized":true,"isSigningField":true,"type":"Vector256"}],["Transaction",{"nth":1,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Transaction"}],["LedgerEntry",{"nth":1,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"LedgerEntry"}],["Validation",{"nth":1,"isVLEncoded":false,"isSerialized":false,"isSigningField":false,"type":"Validation"}],["SignerListID",{"nth":38,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["SettleDelay",{"nth":39,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt32"}],["Channel",{"nth":22,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["ConsensusHash",{"nth":23,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["CheckID",{"nth":24,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"Hash256"}],["TickSize",{"nth":16,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt8"}],["DestinationNode",{"nth":9,"isVLEncoded":false,"isSerialized":true,"isSigningField":true,"type":"UInt64"}]],"TRANSACTION_RESULTS":{"telNO_DST_PARTIAL":-393,"temBAD_SRC_ACCOUNT":-281,"tefPAST_SEQ":-189,"terNO_ACCOUNT":-96,"temREDUNDANT":-275,"tefCREATED":-194,"temDST_IS_SRC":-279,"terRETRY":-99,"temINVALID_FLAG":-276,"temBAD_SEND_CALL_LIMIT":-288,"terNO_LINE":-94,"tefBAD_AUTH":-196,"temBAD_EXPIRATION":-295,"temBAD_SEND_CALL_NO_DIRECT":-286,"temBAD_SEND_CALL_PATHS":-284,"tefBAD_LEDGER":-195,"tefNO_AUTH_REQUIRED":-190,"terOWNERS":-93,"terLAST":-91,"terNO_RIPPLE":-90,"temBAD_FEE":-294,"terPRE_SEQ":-92,"tefMASTER_DISABLED":-187,"temBAD_CURRENCY":-296,"tefDST_TAG_NEEDED":-193,"temBAD_SIGNATURE":-282,"tefFAILURE":-199,"telBAD_PATH_COUNT":-397,"temBAD_TRANSFER_RATE":-280,"tefWRONG_PRIOR":-188,"telBAD_DOMAIN":-398,"temBAD_AMOUNT":-298,"temBAD_AUTH_MASTER":-297,"temBAD_LIMIT":-292,"temBAD_ISSUER":-293,"telBAD_PUBLIC_KEY":-396,"tefBAD_ADD_AUTH":-197,"temBAD_OFFER":-291,"temBAD_SEND_CALL_PARTIAL":-285,"temDST_NEEDED":-278,"tefALREADY":-198,"temUNCERTAIN":-272,"telLOCAL_ERROR":-399,"temREDUNDANT_SEND_MAX":-274,"tefINTERNAL":-191,"temBAD_PATH_LOOP":-289,"tefEXCEPTION":-192,"temRIPPLE_EMPTY":-273,"telINSUF_FEE_P":-394,"temBAD_SEQUENCE":-283,"tefMAX_LEDGER":-186,"terFUNDS_SPENT":-98,"temBAD_SEND_CALL_MAX":-287,"telFAILED_PROCESSING":-395,"terINSUF_FEE_B":-97,"tesSUCCESS":0,"temBAD_PATH":-290,"temMALFORMED":-299,"temUNKNOWN":-271,"temINVALID":-277,"terNO_AUTH":-95,"temBAD_TICK_SIZE":-270,"tecCLAIM":100,"tecPATH_PARTIAL":101,"tecUNFUNDED_ADD":102,"tecUNFUNDED_OFFER":103,"tecUNFUNDED_PAYMENT":104,"tecFAILED_PROCESSING":105,"tecDIR_FULL":121,"tecINSUF_RESERVE_LINE":122,"tecINSUF_RESERVE_OFFER":123,"tecNO_DST":124,"tecNO_DST_INSUF_CALL":125,"tecNO_LINE_INSUF_RESERVE":126,"tecNO_LINE_REDUNDANT":127,"tecPATH_DRY":128,"tecUNFUNDED":129,"tecNO_ALTERNATIVE_KEY":130,"tecNO_REGULAR_KEY":131,"tecOWNERS":132,"tecNO_ISSUER":133,"tecNO_AUTH":134,"tecNO_LINE":135,"tecINSUFF_FEE":136,"tecFROZEN":137,"tecNO_TARGET":138,"tecNO_PERMISSION":139,"tecNO_ENTRY":140,"tecINSUFFICIENT_RESERVE":141,"tecNEED_MASTER_KEY":142,"tecDST_TAG_NEEDED":143,"tecINTERNAL":144,"tecOVERSIZE":145,"tecCRYPTOCONDITION_ERROR":146,"tecINVARIANT_FAILED":147,"tecEXPIRED":148,"tecDUPLICATE":149,"tecKILLED":150},"TRANSACTION_TYPES":{"Invalid":-1,"Payment":0,"EscrowCreate":1,"EscrowFinish":2,"AccountSet":3,"EscrowCancel":4,"SetRegularKey":5,"NickNameSet":6,"OfferCreate":7,"OfferCancel":8,"Contract":9,"TicketCreate":10,"TicketCancel":11,"SignerListSet":12,"PaymentChannelCreate":13,"PaymentChannelFund":14,"PaymentChannelClaim":15,"IssueSet":16,"DepositPreauth":19,"TrustSet":20,"EnableAmendment":100,"SetFee":101}}
 
 /***/ }),
-/* 280 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {return typeof obj;} : function (obj) {return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;};function _toConsumableArray(arr) {if (Array.isArray(arr)) {for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {arr2[i] = arr[i];}return arr2;} else {return Array.from(arr);}}var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var BN = __webpack_require__(25);
 var Decimal = __webpack_require__(74);
 var makeClass = __webpack_require__(4);var _require =
-__webpack_require__(19),SerializedType = _require.SerializedType;var _require2 =
+__webpack_require__(17),SerializedType = _require.SerializedType;var _require2 =
 __webpack_require__(7),bytesToHex = _require2.bytesToHex;var _require3 =
 __webpack_require__(55),Currency = _require3.Currency;var _require4 =
 __webpack_require__(51),AccountID = _require4.AccountID;var _require5 =
@@ -40372,19 +40066,19 @@ module.exports = {
   Amount: Amount };
 
 /***/ }),
-/* 281 */
+/* 257 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 282 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var makeClass = __webpack_require__(4);var _require =
 __webpack_require__(7),parseBytes = _require.parseBytes;var _require2 =
-__webpack_require__(19),SerializedType = _require2.SerializedType;
+__webpack_require__(17),SerializedType = _require2.SerializedType;
 
 var Blob = makeClass({
   mixins: SerializedType,
@@ -40412,7 +40106,7 @@ module.exports = {
   Blob: Blob };
 
 /***/ }),
-/* 283 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40428,14 +40122,14 @@ module.exports = {
   Hash128: Hash128 };
 
 /***/ }),
-/* 284 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
  /* eslint-disable no-unused-expressions */
 
 var makeClass = __webpack_require__(4);var _require =
-__webpack_require__(19),SerializedType = _require.SerializedType,ensureArrayLikeIs = _require.ensureArrayLikeIs;var _require2 =
+__webpack_require__(17),SerializedType = _require.SerializedType,ensureArrayLikeIs = _require.ensureArrayLikeIs;var _require2 =
 __webpack_require__(55),Currency = _require2.Currency;var _require3 =
 __webpack_require__(51),AccountID = _require3.AccountID;
 
@@ -40546,12 +40240,12 @@ module.exports = {
   PathSet: PathSet };
 
 /***/ }),
-/* 285 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var makeClass = __webpack_require__(4);var _require =
-__webpack_require__(19),ensureArrayLikeIs = _require.ensureArrayLikeIs,SerializedType = _require.SerializedType;var _require2 =
+__webpack_require__(17),ensureArrayLikeIs = _require.ensureArrayLikeIs,SerializedType = _require.SerializedType;var _require2 =
 __webpack_require__(24),Field = _require2.Field;var _require3 =
 __webpack_require__(77),STObject = _require3.STObject;var
 ArrayEndMarker = Field.ArrayEndMarker;
@@ -40589,7 +40283,7 @@ module.exports = {
   STArray: STArray };
 
 /***/ }),
-/* 286 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40605,7 +40299,7 @@ module.exports = {
   UInt16: UInt16 };
 
 /***/ }),
-/* 287 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40621,7 +40315,7 @@ module.exports = {
   UInt32: UInt32 };
 
 /***/ }),
-/* 288 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40637,13 +40331,13 @@ module.exports = {
   UInt8: UInt8 };
 
 /***/ }),
-/* 289 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var makeClass = __webpack_require__(4);var _require =
 __webpack_require__(76),Hash256 = _require.Hash256;var _require2 =
-__webpack_require__(19),ensureArrayLikeIs = _require2.ensureArrayLikeIs,SerializedType = _require2.SerializedType;
+__webpack_require__(17),ensureArrayLikeIs = _require2.ensureArrayLikeIs,SerializedType = _require2.SerializedType;
 
 var Vector256 = makeClass({
   mixins: SerializedType,
@@ -40674,11 +40368,11 @@ module.exports = {
   Vector256: Vector256 };
 
 /***/ }),
-/* 290 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var makeClass = __webpack_require__(4);var _require =
 __webpack_require__(24),Field = _require.Field;var _require2 =
 __webpack_require__(7),slice = _require2.slice,parseBytes = _require2.parseBytes;
@@ -40778,14 +40472,14 @@ module.exports = {
   BinaryParser: BinaryParser };
 
 /***/ }),
-/* 291 */
+/* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var HashBase = __webpack_require__(79)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var ARRAY16 = new Array(16)
 
@@ -40931,7 +40625,7 @@ module.exports = MD5
 
 
 /***/ }),
-/* 292 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(80);
@@ -40940,19 +40634,19 @@ exports.Readable = exports;
 exports.Writable = __webpack_require__(84);
 exports.Duplex = __webpack_require__(27);
 exports.Transform = __webpack_require__(86);
-exports.PassThrough = __webpack_require__(298);
+exports.PassThrough = __webpack_require__(274);
 exports.finished = __webpack_require__(57);
-exports.pipeline = __webpack_require__(299);
+exports.pipeline = __webpack_require__(275);
 
 
 /***/ }),
-/* 293 */
+/* 269 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 294 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40973,7 +40667,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var _require = __webpack_require__(5),
     Buffer = _require.Buffer;
 
-var _require2 = __webpack_require__(295),
+var _require2 = __webpack_require__(271),
     inspect = _require2.inspect;
 
 var custom = inspect && inspect.custom || 'inspect';
@@ -41168,13 +40862,13 @@ function () {
 }();
 
 /***/ }),
-/* 295 */
+/* 271 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 296 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41385,10 +41079,10 @@ var createReadableStreamAsyncIterator = function createReadableStreamAsyncIterat
 };
 
 module.exports = createReadableStreamAsyncIterator;
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
 
 /***/ }),
-/* 297 */
+/* 273 */
 /***/ (function(module, exports) {
 
 module.exports = function () {
@@ -41397,7 +41091,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 298 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41430,7 +41124,7 @@ module.exports = PassThrough;
 
 var Transform = __webpack_require__(86);
 
-__webpack_require__(3)(PassThrough, Transform);
+__webpack_require__(2)(PassThrough, Transform);
 
 function PassThrough(options) {
   if (!(this instanceof PassThrough)) return new PassThrough(options);
@@ -41442,7 +41136,7 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 };
 
 /***/ }),
-/* 299 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41545,13 +41239,13 @@ function pipeline() {
 module.exports = pipeline;
 
 /***/ }),
-/* 300 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var Buffer = __webpack_require__(5).Buffer
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var HashBase = __webpack_require__(79)
 
 var ARRAY16 = new Array(16)
@@ -41715,7 +41409,7 @@ module.exports = RIPEMD160
 
 
 /***/ }),
-/* 301 */
+/* 277 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var exports = module.exports = function SHA (algorithm) {
@@ -41727,16 +41421,16 @@ var exports = module.exports = function SHA (algorithm) {
   return new Algorithm()
 }
 
-exports.sha = __webpack_require__(302)
-exports.sha1 = __webpack_require__(303)
-exports.sha224 = __webpack_require__(304)
+exports.sha = __webpack_require__(278)
+exports.sha1 = __webpack_require__(279)
+exports.sha224 = __webpack_require__(280)
 exports.sha256 = __webpack_require__(87)
-exports.sha384 = __webpack_require__(305)
+exports.sha384 = __webpack_require__(281)
 exports.sha512 = __webpack_require__(88)
 
 
 /***/ }),
-/* 302 */
+/* 278 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -41747,9 +41441,9 @@ exports.sha512 = __webpack_require__(88)
  * operation was added.
  */
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var Hash = __webpack_require__(28)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -41836,7 +41530,7 @@ module.exports = Sha
 
 
 /***/ }),
-/* 303 */
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -41848,9 +41542,9 @@ module.exports = Sha
  * See http://pajhome.org.uk/crypt/md5 for details.
  */
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var Hash = __webpack_require__(28)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var K = [
   0x5a827999, 0x6ed9eba1, 0x8f1bbcdc | 0, 0xca62c1d6 | 0
@@ -41941,7 +41635,7 @@ module.exports = Sha1
 
 
 /***/ }),
-/* 304 */
+/* 280 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -41952,10 +41646,10 @@ module.exports = Sha1
  *
  */
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var Sha256 = __webpack_require__(87)
 var Hash = __webpack_require__(28)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var W = new Array(64)
 
@@ -42000,13 +41694,13 @@ module.exports = Sha224
 
 
 /***/ }),
-/* 305 */
+/* 281 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 var SHA512 = __webpack_require__(88)
 var Hash = __webpack_require__(28)
-var Buffer = __webpack_require__(13).Buffer
+var Buffer = __webpack_require__(11).Buffer
 
 var W = new Array(160)
 
@@ -42063,13 +41757,13 @@ module.exports = Sha384
 
 
 /***/ }),
-/* 306 */
+/* 282 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Buffer = __webpack_require__(13).Buffer
-var Transform = __webpack_require__(307).Transform
+var Buffer = __webpack_require__(11).Buffer
+var Transform = __webpack_require__(283).Transform
 var StringDecoder = __webpack_require__(34).StringDecoder
-var inherits = __webpack_require__(3)
+var inherits = __webpack_require__(2)
 
 function CipherBase (hashMode) {
   Transform.call(this)
@@ -42168,7 +41862,7 @@ module.exports = CipherBase
 
 
 /***/ }),
-/* 307 */
+/* 283 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Copyright Joyent, Inc. and other Node contributors.
@@ -42194,15 +41888,15 @@ module.exports = CipherBase
 
 module.exports = Stream;
 
-var EE = __webpack_require__(17).EventEmitter;
-var inherits = __webpack_require__(3);
+var EE = __webpack_require__(14).EventEmitter;
+var inherits = __webpack_require__(2);
 
 inherits(Stream, EE);
 Stream.Readable = __webpack_require__(58);
-Stream.Writable = __webpack_require__(314);
-Stream.Duplex = __webpack_require__(315);
-Stream.Transform = __webpack_require__(316);
-Stream.PassThrough = __webpack_require__(317);
+Stream.Writable = __webpack_require__(290);
+Stream.Duplex = __webpack_require__(291);
+Stream.Transform = __webpack_require__(292);
+Stream.PassThrough = __webpack_require__(293);
 
 // Backwards-compat with node 0.4.x
 Stream.Stream = Stream;
@@ -42301,13 +41995,13 @@ Stream.prototype.pipe = function(dest, options) {
 
 
 /***/ }),
-/* 308 */
+/* 284 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 309 */
+/* 285 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42316,7 +42010,7 @@ Stream.prototype.pipe = function(dest, options) {
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Buffer = __webpack_require__(59).Buffer;
-var util = __webpack_require__(310);
+var util = __webpack_require__(286);
 
 function copyBuffer(src, target, offset) {
   src.copy(target, offset);
@@ -42392,13 +42086,13 @@ if (util && util.inspect && util.inspect.custom) {
 }
 
 /***/ }),
-/* 310 */
+/* 286 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
 /***/ }),
-/* 311 */
+/* 287 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
@@ -42454,7 +42148,7 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(312);
+__webpack_require__(288);
 // On some exotic environments, it's not clear which object `setimmediate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
@@ -42465,10 +42159,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12)))
 
 /***/ }),
-/* 312 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -42658,10 +42352,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14), __webpack_require__(11)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(12), __webpack_require__(9)))
 
 /***/ }),
-/* 313 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42698,7 +42392,7 @@ var Transform = __webpack_require__(92);
 
 /*<replacement>*/
 var util = Object.create(__webpack_require__(35));
-util.inherits = __webpack_require__(3);
+util.inherits = __webpack_require__(2);
 /*</replacement>*/
 
 util.inherits(PassThrough, Transform);
@@ -42714,42 +42408,42 @@ PassThrough.prototype._transform = function (chunk, encoding, cb) {
 };
 
 /***/ }),
-/* 314 */
+/* 290 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(60);
 
 
 /***/ }),
-/* 315 */
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(22);
+module.exports = __webpack_require__(21);
 
 
 /***/ }),
-/* 316 */
+/* 292 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(58).Transform
 
 
 /***/ }),
-/* 317 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(58).PassThrough
 
 
 /***/ }),
-/* 318 */
+/* 294 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 function _toConsumableArray(arr) {if (Array.isArray(arr)) {for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) {arr2[i] = arr[i];}return arr2;} else {return Array.from(arr);}}var _ = __webpack_require__(0);
 var BN = __webpack_require__(25);
-var assert = __webpack_require__(2);
-var types = __webpack_require__(21);var
+var assert = __webpack_require__(3);
+var types = __webpack_require__(20);var
 STObject = types.STObject,Hash256 = types.Hash256;var _require =
 __webpack_require__(93),ShaMap = _require.ShaMap;var _require2 =
 __webpack_require__(33),HashPrefix = _require2.HashPrefix;var _require3 =
@@ -42819,13 +42513,13 @@ module.exports = {
   ledgerHash: ledgerHash };
 
 /***/ }),
-/* 319 */
+/* 295 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 var Decimal = __webpack_require__(74);var _require =
 __webpack_require__(7),bytesToHex = _require.bytesToHex,slice = _require.slice,parseBytes = _require.parseBytes;var _require2 =
-__webpack_require__(21),UInt64 = _require2.UInt64;
+__webpack_require__(20),UInt64 = _require2.UInt64;
 var BN = __webpack_require__(25);
 
 module.exports = {
@@ -42845,14 +42539,14 @@ module.exports = {
   } };
 
 /***/ }),
-/* 320 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
  /* eslint-disable func-style */
 
 var _ = __webpack_require__(0);var _require =
-__webpack_require__(21),AccountID = _require.AccountID;
+__webpack_require__(20),AccountID = _require.AccountID;
 var binary = __webpack_require__(56);var
 
 serializeObject =
@@ -42916,7 +42610,7 @@ module.exports = {
   sign: sign };
 
 /***/ }),
-/* 321 */
+/* 297 */
 /***/ (function(module, exports) {
 
 
@@ -42947,16 +42641,16 @@ module.exports = {
 
 
 /***/ }),
-/* 322 */
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(18);
+var utils = __webpack_require__(15);
 var common_1 = __webpack_require__(1);
-var account_trustline_1 = __webpack_require__(323);
+var account_trustline_1 = __webpack_require__(299);
 // function hexToStringWide(h) {//16进制转中英文
 //     let a = [];
 //     let i = 0;
@@ -43010,13 +42704,13 @@ exports.default = getTrustlines;
 
 
 /***/ }),
-/* 323 */
+/* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = __webpack_require__(9);
+var utils_1 = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
 // function hexToStringWide(h) {//16进制转中英文
 //     let a = [];
@@ -43062,13 +42756,13 @@ exports.default = parseAccountTrustline;
 
 
 /***/ }),
-/* 324 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils = __webpack_require__(18);
+var utils = __webpack_require__(15);
 var common_1 = __webpack_require__(1);
 function getTrustlineBalanceAmount(trustline) {
     return {
@@ -43116,14 +42810,14 @@ exports.default = getBalances;
 
 
 /***/ }),
-/* 325 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(18);
+var utils = __webpack_require__(15);
 var common_1 = __webpack_require__(1);
 function formatBalanceSheet(balanceSheet) {
     var result = {};
@@ -43167,7 +42861,7 @@ exports.default = getBalanceSheet;
 
 
 /***/ }),
-/* 326 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43175,9 +42869,9 @@ exports.default = getBalanceSheet;
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var bignumber_js_1 = __webpack_require__(6);
-var utils_1 = __webpack_require__(18);
+var utils_1 = __webpack_require__(15);
 var common_1 = __webpack_require__(1);
-var pathfind_1 = __webpack_require__(327);
+var pathfind_1 = __webpack_require__(303);
 var NotFoundError = common_1.errors.NotFoundError;
 var ValidationError = common_1.errors.ValidationError;
 function addParams(request, result) {
@@ -43288,14 +42982,14 @@ exports.default = getPaths;
 
 
 /***/ }),
-/* 327 */
+/* 303 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var amount_1 = __webpack_require__(16);
+var amount_1 = __webpack_require__(23);
 function parsePaths(paths) {
     return paths.map(function (steps) { return steps.map(function (step) {
         return _.omit(step, ['type', 'type_hex']);
@@ -43336,16 +43030,16 @@ exports.default = parsePathfind;
 
 
 /***/ }),
-/* 328 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(18);
+var utils = __webpack_require__(15);
 var common_1 = __webpack_require__(1);
-var account_order_1 = __webpack_require__(329);
+var account_order_1 = __webpack_require__(305);
 function requestAccountOffers(connection, address, ledgerVersion, marker, limit) {
     return connection.request({
         command: 'account_offers',
@@ -43372,15 +43066,15 @@ exports.default = getOrders;
 
 
 /***/ }),
-/* 329 */
+/* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var bignumber_js_1 = __webpack_require__(6);
-var amount_1 = __webpack_require__(16);
-var utils_1 = __webpack_require__(9);
+var amount_1 = __webpack_require__(23);
+var utils_1 = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
 var flags_1 = __webpack_require__(97);
 function computeQuality(takerGets, takerPays) {
@@ -43416,15 +43110,15 @@ exports.default = parseAccountOrder;
 
 
 /***/ }),
-/* 330 */
+/* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(18);
-var orderbook_order_1 = __webpack_require__(331);
+var utils = __webpack_require__(15);
+var orderbook_order_1 = __webpack_require__(307);
 var common_1 = __webpack_require__(1);
 // account is to specify a "perspective", which affects which unfunded offers
 // are returned
@@ -43493,17 +43187,17 @@ exports.default = getOrderbook;
 
 
 /***/ }),
-/* 331 */
+/* 307 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils_1 = __webpack_require__(9);
+var utils_1 = __webpack_require__(19);
 var common_1 = __webpack_require__(1);
 var flags_1 = __webpack_require__(97);
-var amount_1 = __webpack_require__(16);
+var amount_1 = __webpack_require__(23);
 function parseOrderbookOrder(order) {
     var direction = (order.Flags & flags_1.orderFlags.Sell) === 0 ? 'buy' : 'sell';
     var takerGetsAmount = amount_1.default(order.TakerGets);
@@ -43539,7 +43233,7 @@ exports.default = parseOrderbookOrder;
 
 
 /***/ }),
-/* 332 */
+/* 308 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43579,25 +43273,13 @@ exports.default = getSettings;
 
 
 /***/ }),
-/* 333 */
+/* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var common_1 = __webpack_require__(1);
-// function hexToStringWide(h) {//16进制转中英文
-//     let a = [];
-//     let i = 0;
-//     if (h.length % 4) {
-//         a.push(String.fromCharCode(parseInt(h.substring(0, 4), 16)));
-//         i = 4;
-//     }
-//     for (; i<h.length; i+=4) {
-//         a.push(String.fromCharCode(parseInt(h.substring(i, i+4), 16)));
-//     }
-//     return a.join('');
-// }
 function formatAccountInfo(response) {
     var data = response.account_data;
     var obj = {
@@ -43606,8 +43288,7 @@ function formatAccountInfo(response) {
         ownerCount: data.OwnerCount,
         previousInitiatedTransactionID: data.AccountTxnID,
         previousAffectingTransactionID: data.PreviousTxnID,
-        previousAffectingTransactionLedgerVersion: data.PreviousTxnLgrSeq,
-        code: data.Code
+        previousAffectingTransactionLedgerVersion: data.PreviousTxnLgrSeq
     };
     // if(data.NickName)
     //   obj.nickName = hexToStringWide(hexToStringWide(data.NickName));
@@ -43627,7 +43308,7 @@ exports.default = getAccountInfo;
 
 
 /***/ }),
-/* 334 */
+/* 310 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43665,7 +43346,7 @@ exports.default = getAccountByName;
 
 
 /***/ }),
-/* 335 */
+/* 311 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43700,24 +43381,12 @@ exports.default = getAccountIssues;
 
 
 /***/ }),
-/* 336 */
+/* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function hexToStringWide(h) {
-    var a = [];
-    var i = 0;
-    if (h.length % 4) {
-        a.push(String.fromCharCode(parseInt(h.substring(0, 4), 16)));
-        i = 4;
-    }
-    for (; i < h.length; i += 4) {
-        a.push(String.fromCharCode(parseInt(h.substring(i, i + 4), 16)));
-    }
-    return a.join('');
-}
 function getAccountInvoices(address) {
     var request = {
         command: 'account_invoices',
@@ -43731,74 +43400,14 @@ exports.default = getAccountInvoices;
 
 
 /***/ }),
-/* 337 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var payment_channel_1 = __webpack_require__(338);
-var common_1 = __webpack_require__(1);
-var NotFoundError = common_1.errors.NotFoundError;
-function formatResponse(response) {
-    if (response.node !== undefined &&
-        response.node.LedgerEntryType === 'PayChannel') {
-        return payment_channel_1.default(response.node);
-    }
-    else {
-        throw new NotFoundError('Payment channel ledger entry not found');
-    }
-}
-function getPaymentChannel(id) {
-    common_1.validate.getPaymentChannel({ id: id });
-    var request = {
-        command: 'ledger_entry',
-        index: id,
-        binary: false,
-        ledger_index: 'validated'
-    };
-    return this.connection.request(request).then(formatResponse);
-}
-exports.default = getPaymentChannel;
-
-
-/***/ }),
-/* 338 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = __webpack_require__(9);
-var common_1 = __webpack_require__(1);
-function parsePaymentChannel(data) {
-    return common_1.removeUndefined({
-        account: data.Account,
-        amount: common_1.dropsToCall(data.Amount),
-        balance: common_1.dropsToCall(data.Balance),
-        destination: data.Destination,
-        publicKey: data.PublicKey,
-        settleDelay: data.SettleDelay,
-        expiration: utils_1.parseTimestamp(data.Expiration),
-        cancelAfter: utils_1.parseTimestamp(data.CancelAfter),
-        sourceTag: data.SourceTag,
-        destinationTag: data.DestinationTag,
-        previousAffectingTransactionID: data.PreviousTxnID,
-        previousAffectingTransactionLedgerVersion: data.PreviousTxnLgrSeq
-    });
-}
-exports.default = parsePaymentChannel;
-
-
-/***/ }),
-/* 339 */
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 // const validate = utils.common.validate
 var toCalledAmount = utils.common.toCalledAmount;
 var paymentFlags = utils.common.txFlags.Payment;
@@ -43817,6 +43426,7 @@ function applyAnyCounterpartyEncoding(payment) {
         _.forEach(['amount', 'minAmount', 'maxAmount'], function (key) {
             if (isIOUWithoutCounterparty(adjustment[key])) {
                 adjustment[key].counterparty = adjustment.issuer;
+                // TODO check use address or issuer
                 // adjustment[key].counterparty = adjustment.address
             }
         });
@@ -43897,7 +43507,7 @@ exports.default = preparePayment;
 
 
 /***/ }),
-/* 340 */
+/* 314 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43905,7 +43515,7 @@ exports.default = preparePayment;
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var bignumber_js_1 = __webpack_require__(6);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 var validate = utils.common.validate;
 var trustlineFlags = utils.common.txFlags.TrustSet;
 function convertQuality(quality) {
@@ -43955,14 +43565,14 @@ exports.default = prepareTrustline;
 
 
 /***/ }),
-/* 341 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 var offerFlags = utils.common.txFlags.OfferCreate;
 var common_1 = __webpack_require__(1);
 function createOrderTransaction(account, order) {
@@ -44010,14 +43620,14 @@ exports.default = prepareOrder;
 
 
 /***/ }),
-/* 342 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 var validate = utils.common.validate;
 function createOrderCancellationTransaction(account, orderCancellation) {
     var txJSON = {
@@ -44040,142 +43650,17 @@ exports.default = prepareOrderCancellation;
 
 
 /***/ }),
-/* 343 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
-var common_1 = __webpack_require__(1);
-var ValidationError = utils.common.errors.ValidationError;
-function createEscrowCreationTransaction(account, payment) {
-    var txJSON = {
-        TransactionType: 'EscrowCreate',
-        Account: account,
-        Destination: payment.destination,
-        Amount: common_1.callToDrops(payment.amount)
-    };
-    if (payment.condition !== undefined) {
-        txJSON.Condition = payment.condition;
-    }
-    if (payment.allowCancelAfter !== undefined) {
-        txJSON.CancelAfter = common_1.iso8601ToCallTime(payment.allowCancelAfter);
-    }
-    if (payment.allowExecuteAfter !== undefined) {
-        txJSON.FinishAfter = common_1.iso8601ToCallTime(payment.allowExecuteAfter);
-    }
-    if (payment.sourceTag !== undefined) {
-        txJSON.SourceTag = payment.sourceTag;
-    }
-    if (payment.destinationTag !== undefined) {
-        txJSON.DestinationTag = payment.destinationTag;
-    }
-    if (payment.memos !== undefined) {
-        txJSON.Memos = _.map(payment.memos, utils.convertMemo);
-    }
-    if (Boolean(payment.allowCancelAfter) && Boolean(payment.allowExecuteAfter) &&
-        txJSON.CancelAfter <= txJSON.FinishAfter) {
-        throw new ValidationError('"CancelAfter" must be after "FinishAfter" for'
-            + ' EscrowCreate');
-    }
-    return txJSON;
-}
-function prepareEscrowCreation(address, escrowCreation, instructions) {
-    if (instructions === void 0) { instructions = {}; }
-    common_1.validate.prepareEscrowCreation({ address: address, escrowCreation: escrowCreation, instructions: instructions });
-    var txJSON = createEscrowCreationTransaction(address, escrowCreation);
-    return utils.prepareTransaction(txJSON, this, instructions);
-}
-exports.default = prepareEscrowCreation;
-
-
-/***/ }),
-/* 344 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
-var validate = utils.common.validate;
-var ValidationError = utils.common.errors.ValidationError;
-function createEscrowExecutionTransaction(account, payment) {
-    var txJSON = {
-        TransactionType: 'EscrowFinish',
-        Account: account,
-        Owner: payment.owner,
-        OfferSequence: payment.escrowSequence
-    };
-    if (Boolean(payment.condition) !== Boolean(payment.fulfillment)) {
-        throw new ValidationError('"condition" and "fulfillment" fields on'
-            + ' EscrowFinish must only be specified together.');
-    }
-    if (payment.condition !== undefined) {
-        txJSON.Condition = payment.condition;
-    }
-    if (payment.fulfillment !== undefined) {
-        txJSON.Fulfillment = payment.fulfillment;
-    }
-    if (payment.memos !== undefined) {
-        txJSON.Memos = _.map(payment.memos, utils.convertMemo);
-    }
-    return txJSON;
-}
-function prepareEscrowExecution(address, escrowExecution, instructions) {
-    if (instructions === void 0) { instructions = {}; }
-    validate.prepareEscrowExecution({ address: address, escrowExecution: escrowExecution, instructions: instructions });
-    var txJSON = createEscrowExecutionTransaction(address, escrowExecution);
-    return utils.prepareTransaction(txJSON, this, instructions);
-}
-exports.default = prepareEscrowExecution;
-
-
-/***/ }),
-/* 345 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
-var validate = utils.common.validate;
-function createEscrowCancellationTransaction(account, payment) {
-    var txJSON = {
-        TransactionType: 'EscrowCancel',
-        Account: account,
-        Owner: payment.owner,
-        OfferSequence: payment.escrowSequence
-    };
-    if (payment.memos !== undefined) {
-        txJSON.Memos = _.map(payment.memos, utils.convertMemo);
-    }
-    return txJSON;
-}
-function prepareEscrowCancellation(address, escrowCancellation, instructions) {
-    if (instructions === void 0) { instructions = {}; }
-    validate.prepareEscrowCancellation({ address: address, escrowCancellation: escrowCancellation, instructions: instructions });
-    var txJSON = createEscrowCancellationTransaction(address, escrowCancellation);
-    return utils.prepareTransaction(txJSON, this, instructions);
-}
-exports.default = prepareEscrowCancellation;
-
-
-/***/ }),
-/* 346 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(Buffer) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var assert = __webpack_require__(2);
+var assert = __webpack_require__(3);
 var bignumber_js_1 = __webpack_require__(6);
-var utils = __webpack_require__(10);
-var validate = utils.common.validate;
+var utils = __webpack_require__(16);
+// const validate = utils.common.validate
 var AccountFlagIndices = utils.common.constants.AccountFlagIndices;
 var AccountFields = utils.common.constants.AccountFields;
 // Emptry string passed to setting will clear it
@@ -44256,6 +43741,7 @@ function createSettingsTransactionWithoutMemos(account, settings) {
             SignerEntries: _.map(settings.signers.weights, formatSignerEntry)
         };
     }
+    // to remove, move to issueset transaction
     if (settings.total) {
         return {
             TransactionType: 'IssueSet',
@@ -44282,8 +43768,9 @@ function createSettingsTransaction(account, settings) {
     return txJSON;
 }
 function prepareSettings(address, settings, instructions) {
-    if (instructions === void 0) { instructions = {}; }
+    // TODO use it
     // validate.prepareSettings({address, settings, instructions})
+    if (instructions === void 0) { instructions = {}; }
     var txJSON = createSettingsTransaction(address, settings);
     return utils.prepareTransaction(txJSON, this, instructions);
 }
@@ -44292,7 +43779,7 @@ exports.default = prepareSettings;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 347 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44300,7 +43787,7 @@ exports.default = prepareSettings;
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var bignumber_js_1 = __webpack_require__(6);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 var validate = utils.common.validate;
 var issuesetFlags = utils.common.txFlags.IssueSet;
 var ValidationError = utils.common.errors.ValidationError;
@@ -44404,13 +43891,13 @@ exports.default = prepareIssueSet;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 348 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 var keypairs = __webpack_require__(37);
 var binary = __webpack_require__(40);
 var call_hashes_1 = __webpack_require__(44);
@@ -44452,7 +43939,7 @@ exports.default = sign;
 
 
 /***/ }),
-/* 349 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44460,7 +43947,7 @@ exports.default = sign;
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
 var binary = __webpack_require__(40);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 var bignumber_js_1 = __webpack_require__(6);
 var call_address_codec_1 = __webpack_require__(30);
 var common_1 = __webpack_require__(1);
@@ -44496,14 +43983,14 @@ exports.default = combine;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5).Buffer))
 
 /***/ }),
-/* 350 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var _ = __webpack_require__(0);
-var utils = __webpack_require__(10);
+var utils = __webpack_require__(16);
 function isImmediateRejection(engineResult) {
     // note: "tel" errors mean the local server refused to process the
     // transaction *at that time*, but it could potentially buffer the
@@ -44544,7 +44031,7 @@ exports.default = submit;
 
 
 /***/ }),
-/* 351 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44572,7 +44059,7 @@ exports.generateAddressAPI = generateAddressAPI;
 
 
 /***/ }),
-/* 352 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44594,7 +44081,7 @@ exports.fromSecret = fromSecret;
 
 
 /***/ }),
-/* 353 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44667,14 +44154,14 @@ exports.default = computeLedgerHash;
 
 
 /***/ }),
-/* 354 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var common_1 = __webpack_require__(1);
-var ledger_1 = __webpack_require__(355);
+var ledger_1 = __webpack_require__(326);
 function getLedger(options) {
     if (options === void 0) { options = {}; }
     common_1.validate.getLedger({ options: options });
@@ -44694,7 +44181,7 @@ exports.default = getLedger;
 
 
 /***/ }),
-/* 355 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44754,7 +44241,7 @@ exports.default = parseLedger;
 
 
 /***/ }),
-/* 356 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
